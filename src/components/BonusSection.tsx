@@ -8,10 +8,12 @@ import CountdownTimer from "./CountdownTimer";
 import ReviewMarquee from "./ReviewMarquee";
 import { productImages, reviewShots } from "@/data/content";
 import { trackInitiateCheckout } from "@/lib/pixels";
+import GiftBurst from "./GiftBurst";
 
 export default function BonusSection() {
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-liora-50 to-white py-16">
+      <GiftBurst />
       <AnimatedSection className="mx-auto max-w-3xl px-5 text-center">
         <motion.div
           animate={{ rotate: [0, -8, 8, 0] }}
