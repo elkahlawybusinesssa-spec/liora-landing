@@ -97,7 +97,7 @@ export default function ProductCatalog() {
                   src={item.cover}
                   alt={item.numeric ? `${item.label} ${item.numeric}` : item.label}
                   fill
-                  className="object-cover"
+                  className="object-cover object-top"
                 />
               </div>
               <p className="px-2 py-3 text-sm font-bold text-liora-900">
