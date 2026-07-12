@@ -14,10 +14,12 @@ import StickyMobileCTA from "@/components/StickyMobileCTA";
 import Footer from "@/components/Footer";
 import VisitTracker from "@/components/VisitTracker";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
+import ContentProtection from "@/components/ContentProtection";
 
 export default function Home() {
   return (
-    <main>
+    <main className="protected-page">
+      <ContentProtection />
       <VisitTracker />
       <TopBar />
       <Navbar />
