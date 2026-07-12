@@ -6,9 +6,14 @@ import { Gift } from "lucide-react";
 import AnimatedSection from "./AnimatedSection";
 import CountdownTimer from "./CountdownTimer";
 import ReviewMarquee from "./ReviewMarquee";
-import { productImages, reviewShots } from "@/data/content";
+import { productImages } from "@/data/content";
 import { trackInitiateCheckout } from "@/lib/pixels";
 import GiftBurst from "./GiftBurst";
+
+const STORAGE_BASE =
+  "https://ghckapztoiimrmxtadpx.supabase.co/storage/v1/object/public/catalog/catalog";
+
+const giftShots = Array.from({ length: 8 }, (_, i) => `${STORAGE_BASE}/gifts/${i + 1}.webp`);
 
 export default function BonusSection() {
   return (
@@ -51,7 +56,7 @@ export default function BonusSection() {
         </motion.div>
 
         <div className="-mx-5">
-          <ReviewMarquee images={[...reviewShots].reverse()} reverse />
+          <ReviewMarquee images={giftShots} reverse />
         </div>
 
         <motion.a
