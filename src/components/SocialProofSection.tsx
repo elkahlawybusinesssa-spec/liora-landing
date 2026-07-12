@@ -1,12 +1,15 @@
 import ReviewMarquee from "./ReviewMarquee";
 import AnimatedSection from "./AnimatedSection";
-import { galleryShots, productImages } from "@/data/content";
+
+const STORAGE_BASE =
+  "https://ghckapztoiimrmxtadpx.supabase.co/storage/v1/object/public/catalog/catalog";
 
 const productShots = [
-  productImages.booksSet,
-  productImages.giftsBonus,
-  productImages.finalShot,
-  ...galleryShots,
+  `${STORAGE_BASE}/pre/1.webp`,
+  `${STORAGE_BASE}/Letters-en/1.webp`,
+  `${STORAGE_BASE}/numbers-en/1.webp`,
+  `${STORAGE_BASE}/Letters-ar/1.webp`,
+  `${STORAGE_BASE}/numbers-ar/1.webp`,
 ];
 
 export default function SocialProofSection() {
