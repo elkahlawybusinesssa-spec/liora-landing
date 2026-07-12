@@ -28,8 +28,8 @@ export default function Home() {
       <ProductCatalog />
       <BonusSection />
       <FeaturesGrid />
-      <Testimonials />
       <Gallery />
+      <Testimonials />
       <GuaranteeStrip />
       <FAQ />
       <FinalCTA />
