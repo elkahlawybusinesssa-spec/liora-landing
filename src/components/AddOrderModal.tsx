@@ -120,7 +120,7 @@ export default function AddOrderModal({
             <input
               name="price"
               type="number"
-              defaultValue={149}
+              defaultValue={179}
               dir="ltr"
               className="w-full rounded-xl border border-liora-100 px-3 py-2 outline-none focus:border-liora-500"
             />

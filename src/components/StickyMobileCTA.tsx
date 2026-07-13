@@ -13,7 +13,7 @@ export default function StickyMobileCTA() {
     >
       <div>
         <p className="text-xs text-liora-500 line-through">299 ريال</p>
-        <p className="text-lg font-black text-liora-900">149 ريال</p>
+        <p className="text-lg font-black text-liora-900">179 ريال</p>
       </div>
       <motion.a
         whileTap={{ scale: 0.95 }}

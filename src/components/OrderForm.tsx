@@ -3,8 +3,25 @@
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Loader2 } from "lucide-react";
+import { Loader2, Check } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+
+const PRODUCT_PRICE = 179;
+
+const shippingOptions = [
+  {
+    id: "pickup",
+    label: "مجاني لأقرب نقطة استلام ريدبوكس",
+    note: "سيتم التواصل معكم وإفادتكم بأقرب نقطة",
+    cost: 0,
+  },
+  {
+    id: "delivery",
+    label: "الشحن إلى باب المنزل",
+    note: "",
+    cost: 20,
+  },
+];
 
 const cities = [
   "الرياض",
@@ -25,6 +42,11 @@ export default function OrderForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [phone, setPhone] = useState("");
+  const [shippingMethod, setShippingMethod] = useState<"pickup" | "delivery">("pickup");
+
+  const shippingCost =
+    shippingOptions.find((s) => s.id === shippingMethod)?.cost ?? 0;
+  const total = PRODUCT_PRICE + shippingCost;
 
   function handlePhoneChange(e: React.ChangeEvent<HTMLInputElement>) {
     const westernized = e.target.value.replace(
@@ -62,6 +84,9 @@ export default function OrderForm() {
       city,
       address,
       notes: notes || null,
+      price: PRODUCT_PRICE,
+      shipping_method: shippingMethod,
+      shipping_cost: shippingCost,
     });
     setLoading(false);
 
@@ -158,6 +183,59 @@ export default function OrderForm() {
           placeholder="أي تفاصيل إضافية تحبين تخبرينا فيها"
           className="w-full resize-none rounded-xl border border-liora-100 px-4 py-3 text-liora-950 outline-none transition focus:border-liora-500 focus:ring-2 focus:ring-liora-200"
         />
+      </div>
+
+      <div>
+        <label className="mb-2 block text-sm font-bold text-liora-900">
+          اختاري طريقة الشحن
+        </label>
+        <div className="space-y-2">
+          {shippingOptions.map((option) => {
+            const selected = shippingMethod === option.id;
+            return (
+              <button
+                key={option.id}
+                type="button"
+                onClick={() => setShippingMethod(option.id as "pickup" | "delivery")}
+                className={`flex w-full items-center justify-between gap-3 rounded-xl border px-4 py-3 text-right transition ${
+                  selected
+                    ? "border-liora-500 bg-liora-50 ring-2 ring-liora-200"
+                    : "border-liora-100"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <span
+                    className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2 ${
+                      selected
+                        ? "border-liora-600 bg-liora-600 text-white"
+                        : "border-liora-200"
+                    }`}
+                  >
+                    {selected && <Check size={12} strokeWidth={3} />}
+                  </span>
+                  <span>
+                    <span className="block text-sm font-bold text-liora-900">
+                      {option.label}
+                    </span>
+                    {option.note && (
+                      <span className="mt-0.5 block text-xs text-liora-500">
+                        {option.note}
+                      </span>
+                    )}
+                  </span>
+                </div>
+                <span className="flex-shrink-0 text-sm font-bold text-liora-800">
+                  {option.cost === 0 ? "مجاني" : `${option.cost} ريال`}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between rounded-xl bg-liora-50 px-4 py-3">
+        <span className="font-bold text-liora-900">الإجمالي</span>
+        <span className="text-xl font-black text-liora-900">{total} ريال</span>
       </div>
 
       {error && (

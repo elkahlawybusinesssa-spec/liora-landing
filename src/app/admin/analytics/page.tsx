@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
-const UNIT_PRICE = 149;
+const UNIT_PRICE = 179;
 
 interface Stats {
   visits: number;

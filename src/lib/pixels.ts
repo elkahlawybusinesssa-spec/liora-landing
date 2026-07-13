@@ -6,7 +6,7 @@ declare global {
   }
 }
 
-const ORDER_VALUE = 149;
+const ORDER_VALUE = 179;
 const CURRENCY = "SAR";
 
 export function trackOrderConversion() {
