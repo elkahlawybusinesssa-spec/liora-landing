@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { MessageCircle, RefreshCw, LogOut, BarChart3, Plus, Trash2 } from "lucide-react";
+import { MessageCircle, RefreshCw, LogOut, BarChart3, Plus, Trash2, Globe } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { toWhatsappLink } from "@/lib/phone";
 import { STATUS_OPTIONS } from "@/lib/orderStatus";
@@ -19,6 +19,7 @@ interface Order {
   price: number | null;
   notes: string | null;
   status: string;
+  source: string | null;
   created_at: string;
 }
 
@@ -170,6 +171,18 @@ export default function AdminOrdersPage() {
                 </div>
 
                 <div className="flex items-center gap-2">
+                  {order.source === "website" ? (
+                    <span className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-2.5 text-xs font-bold text-blue-700 ring-1 ring-blue-200">
+                      <Globe size={14} />
+                      موقع
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1.5 rounded-full bg-green-50 px-3 py-2.5 text-xs font-bold text-green-700 ring-1 ring-green-200">
+                      <MessageCircle size={14} />
+                      واتساب
+                    </span>
+                  )}
+
                   <select
                     value={order.status}
                     onChange={(e) => handleStatusChange(order.id, e.target.value)}

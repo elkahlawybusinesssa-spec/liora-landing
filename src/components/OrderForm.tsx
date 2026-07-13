@@ -87,6 +87,7 @@ export default function OrderForm() {
       price: PRODUCT_PRICE,
       shipping_method: shippingMethod,
       shipping_cost: shippingCost,
+      source: "website",
     });
     setLoading(false);
 

@@ -27,6 +27,7 @@ export default function AddOrderModal({
     const city = String(data.get("city") || "").trim();
     const address = String(data.get("address") || "").trim();
     const status = String(data.get("status") || "new");
+    const source = String(data.get("source") || "whatsapp");
     const notes = String(data.get("notes") || "").trim();
 
     if (!full_name || !phone) {
@@ -43,6 +44,7 @@ export default function AddOrderModal({
       city,
       address,
       status,
+      source,
       notes: notes || null,
     });
     setSaving(false);
@@ -144,6 +146,20 @@ export default function AddOrderModal({
               name="address"
               className="w-full rounded-xl border border-liora-100 px-3 py-2 outline-none focus:border-liora-500"
             />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-bold text-liora-900">
+              مصدر العميل
+            </label>
+            <select
+              name="source"
+              defaultValue="whatsapp"
+              className="w-full rounded-xl border border-liora-100 px-3 py-2 outline-none focus:border-liora-500"
+            >
+              <option value="whatsapp">واتساب</option>
+              <option value="website">الموقع</option>
+            </select>
           </div>
 
           <div>
