@@ -7,9 +7,9 @@ import { Loader2, Check } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
 const quantityOptions = [
-  { qty: 1, price: 179, label: "مجموعة واحدة" },
-  { qty: 2, price: 310, label: "مجموعتين" },
-  { qty: 3, price: 450, label: "3 مجموعات" },
+  { qty: 1, price: 179, label: "مجموعة واحدة", popular: false },
+  { qty: 2, price: 310, label: "مجموعتين", popular: true },
+  { qty: 3, price: 450, label: "3 مجموعات", popular: false },
 ];
 
 const shippingOptions = [
@@ -130,14 +130,16 @@ export default function OrderForm() {
                 type="button"
                 onClick={() => setQuantity(option.qty)}
                 className={`relative flex flex-col items-center gap-1 rounded-xl border px-2 py-3 text-center transition ${
+                  option.popular ? "mt-2" : ""
+                } ${
                   selected
                     ? "border-liora-500 bg-liora-50 ring-2 ring-liora-200"
                     : "border-liora-100"
                 }`}
               >
-                {savings > 0 && (
-                  <span className="absolute -top-2 right-1/2 translate-x-1/2 rounded-full bg-gold-500 px-2 py-0.5 text-[10px] font-black text-liora-950 whitespace-nowrap">
-                    وفري {savings} ريال
+                {option.popular && (
+                  <span className="absolute -top-3 right-1/2 translate-x-1/2 rounded-full bg-gold-500 px-2 py-0.5 text-[10px] font-black text-liora-950 whitespace-nowrap">
+                    ⭐ الأكثر طلباً
                   </span>
                 )}
                 <span className="text-sm font-bold text-liora-900">
@@ -147,6 +149,11 @@ export default function OrderForm() {
                   {option.price}
                   <span className="text-xs font-bold"> ريال</span>
                 </span>
+                {savings > 0 && (
+                  <span className="text-[10px] font-bold text-liora-600">
+                    وفري {savings} ريال
+                  </span>
+                )}
               </button>
             );
           })}
