@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { MessageCircle, RefreshCw, LogOut, BarChart3, Plus } from "lucide-react";
+import { MessageCircle, RefreshCw, LogOut, BarChart3, Plus, Trash2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { toWhatsappLink } from "@/lib/phone";
 import { STATUS_OPTIONS } from "@/lib/orderStatus";
@@ -77,6 +77,14 @@ export default function AdminOrdersPage() {
       prev ? prev.map((o) => (o.id === orderId ? { ...o, status } : o)) : prev
     );
     await supabase.from("orders").update({ status }).eq("id", orderId);
+  }
+
+  async function handleDelete(order: Order) {
+    if (!confirm(`متأكدة إنك عايزة تحذفي طلب "${order.full_name}"؟ الإجراء ده مش قابل للتراجع.`)) {
+      return;
+    }
+    setOrders((prev) => (prev ? prev.filter((o) => o.id !== order.id) : prev));
+    await supabase.from("orders").delete().eq("id", order.id);
   }
 
   if (checkingAuth) return null;
@@ -183,6 +191,13 @@ export default function AdminOrdersPage() {
                     <MessageCircle size={18} />
                     واتساب
                   </a>
+
+                  <button
+                    onClick={() => handleDelete(order)}
+                    className="flex items-center justify-center gap-2 rounded-full bg-white px-4 py-2.5 font-bold text-red-600 shadow ring-1 ring-red-200 transition hover:scale-105 hover:bg-red-50"
+                  >
+                    <Trash2 size={18} />
+                  </button>
                 </div>
               </div>
             ))}
