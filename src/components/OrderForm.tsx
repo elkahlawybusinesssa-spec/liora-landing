@@ -150,7 +150,7 @@ export default function OrderForm() {
                   <span className="text-xs font-bold"> ريال</span>
                 </span>
                 {option.popular && (
-                  <span className="text-[10px] font-bold text-liora-600">
+                  <span className="mt-1 rounded-full bg-liora-100 px-2 py-0.5 text-[10px] font-black text-liora-700 whitespace-nowrap">
                     ⭐ الأكثر طلباً
                   </span>
                 )}

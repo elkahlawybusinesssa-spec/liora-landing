@@ -187,7 +187,11 @@ export default function AdminOrdersPage() {
                   <select
                     value={order.status}
                     onChange={(e) => handleStatusChange(order.id, e.target.value)}
-                    className="rounded-full border border-liora-100 bg-white px-3 py-2.5 text-sm font-bold text-liora-800 shadow outline-none focus:border-liora-500"
+                    className={`rounded-full border px-3 py-2.5 text-sm font-bold shadow outline-none transition ${
+                      order.status === "delivered"
+                        ? "border-green-300 bg-green-500 text-white focus:border-green-500"
+                        : "border-liora-100 bg-white text-liora-800 focus:border-liora-500"
+                    }`}
                   >
                     {STATUS_OPTIONS.map((s) => (
                       <option key={s.value} value={s.value}>
