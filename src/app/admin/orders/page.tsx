@@ -3,9 +3,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { MessageCircle, RefreshCw, LogOut, BarChart3 } from "lucide-react";
+import { MessageCircle, RefreshCw, LogOut, BarChart3, Plus } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { toWhatsappLink } from "@/lib/phone";
+import { STATUS_OPTIONS } from "@/lib/orderStatus";
+import AddOrderModal from "@/components/AddOrderModal";
 
 interface Order {
   id: string;
@@ -13,9 +15,21 @@ interface Order {
   phone: string;
   city: string;
   address: string;
+  product: string | null;
+  price: number | null;
   notes: string | null;
   status: string;
   created_at: string;
+}
+
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleString("en-GB", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 function whatsappMessage(order: Order) {
@@ -27,6 +41,7 @@ export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[] | null>(null);
   const [error, setError] = useState("");
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const [showAddModal, setShowAddModal] = useState(false);
 
   const loadOrders = useCallback(async () => {
     setError("");
@@ -57,6 +72,13 @@ export default function AdminOrdersPage() {
     router.replace("/admin");
   }
 
+  async function handleStatusChange(orderId: string, status: string) {
+    setOrders((prev) =>
+      prev ? prev.map((o) => (o.id === orderId ? { ...o, status } : o)) : prev
+    );
+    await supabase.from("orders").update({ status }).eq("id", orderId);
+  }
+
   if (checkingAuth) return null;
 
   return (
@@ -66,7 +88,14 @@ export default function AdminOrdersPage() {
           <h1 className="text-2xl font-black text-liora-900">
             طلبات العملاء {orders ? `(${orders.length})` : ""}
           </h1>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="flex items-center gap-2 rounded-full bg-gold-500 px-4 py-2 text-sm font-bold text-liora-950 shadow"
+            >
+              <Plus size={16} />
+              إضافة طلب
+            </button>
             <Link
               href="/admin/analytics"
               className="flex items-center gap-2 rounded-full bg-liora-800 px-4 py-2 text-sm font-bold text-white shadow"
@@ -116,30 +145,57 @@ export default function AdminOrdersPage() {
                   <p className="text-sm text-liora-600">
                     {order.city} — {order.address}
                   </p>
+                  {order.product && (
+                    <p className="mt-1 text-xs text-liora-500">
+                      المنتج: {order.product}
+                      {order.price != null ? ` — ${order.price} ريال` : ""}
+                    </p>
+                  )}
                   {order.notes && (
                     <p className="mt-1 text-xs text-liora-500">
                       ملاحظات: {order.notes}
                     </p>
                   )}
-                  <p className="mt-1 text-xs text-liora-400">
-                    {new Date(order.created_at).toLocaleString("ar-SA")}
+                  <p className="mt-1 text-xs text-liora-400" dir="ltr">
+                    {formatDate(order.created_at)}
                   </p>
                 </div>
 
-                <a
-                  href={toWhatsappLink(order.phone, whatsappMessage(order))}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 rounded-full bg-green-500 px-5 py-2.5 font-bold text-white shadow transition hover:scale-105"
-                >
-                  <MessageCircle size={18} />
-                  واتساب
-                </a>
+                <div className="flex items-center gap-2">
+                  <select
+                    value={order.status}
+                    onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                    className="rounded-full border border-liora-100 bg-white px-3 py-2.5 text-sm font-bold text-liora-800 shadow outline-none focus:border-liora-500"
+                  >
+                    {STATUS_OPTIONS.map((s) => (
+                      <option key={s.value} value={s.value}>
+                        {s.label}
+                      </option>
+                    ))}
+                  </select>
+
+                  <a
+                    href={toWhatsappLink(order.phone, whatsappMessage(order))}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 rounded-full bg-green-500 px-5 py-2.5 font-bold text-white shadow transition hover:scale-105"
+                  >
+                    <MessageCircle size={18} />
+                    واتساب
+                  </a>
+                </div>
               </div>
             ))}
           </div>
         )}
       </div>
+
+      {showAddModal && (
+        <AddOrderModal
+          onClose={() => setShowAddModal(false)}
+          onAdded={loadOrders}
+        />
+      )}
     </main>
   );
 }
