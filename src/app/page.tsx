@@ -1,5 +1,6 @@
 import TopBar from "@/components/TopBar";
 import Navbar from "@/components/Navbar";
+import PromoBanner from "@/components/PromoBanner";
 import Hero from "@/components/Hero";
 import SocialProofSection from "@/components/SocialProofSection";
 import ProductCatalog from "@/components/ProductCatalog";
@@ -23,6 +24,7 @@ export default function Home() {
       <VisitTracker />
       <TopBar />
       <Navbar />
+      <PromoBanner />
       <Hero />
       <SocialProofSection />
       <ProductCatalog />
