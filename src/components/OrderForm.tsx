@@ -117,50 +117,6 @@ export default function OrderForm() {
       className="mx-auto mt-8 w-full max-w-md space-y-4 rounded-3xl bg-white p-6 text-right shadow-2xl"
     >
       <div>
-        <label className="mb-2 block text-sm font-bold text-liora-900">
-          كام مجموعة تحبي تطلبي؟
-        </label>
-        <div className="grid grid-cols-3 gap-2">
-          {quantityOptions.map((option) => {
-            const selected = quantity === option.qty;
-            const savings = option.qty * 179 - option.price;
-            return (
-              <button
-                key={option.qty}
-                type="button"
-                onClick={() => setQuantity(option.qty)}
-                className={`relative flex flex-col items-center gap-1 rounded-xl border px-2 py-3 text-center transition ${
-                  savings > 0 ? "mt-2" : ""
-                } ${
-                  selected
-                    ? "border-liora-500 bg-liora-50 ring-2 ring-liora-200"
-                    : "border-liora-100"
-                }`}
-              >
-                {savings > 0 && (
-                  <span className="absolute -top-3 right-1/2 translate-x-1/2 rounded-full bg-gold-500 px-2 py-0.5 text-[10px] font-black text-liora-950 whitespace-nowrap">
-                    وفري {savings} ريال
-                  </span>
-                )}
-                <span className="text-sm font-bold text-liora-900">
-                  {option.label}
-                </span>
-                <span className="text-lg font-black text-liora-800">
-                  {option.price}
-                  <span className="text-xs font-bold"> ريال</span>
-                </span>
-                {option.popular && (
-                  <span className="mt-1 rounded-full bg-liora-100 px-2 py-0.5 text-[10px] font-black text-liora-700 whitespace-nowrap">
-                    ⭐ الأكثر طلباً
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      <div>
         <label className="mb-1 block text-sm font-bold text-liora-900">
           الاسم الكامل
         </label>
@@ -236,6 +192,50 @@ export default function OrderForm() {
           placeholder="أي تفاصيل إضافية تحبين تخبرينا فيها"
           className="w-full resize-none rounded-xl border border-liora-100 px-4 py-3 text-liora-950 outline-none transition focus:border-liora-500 focus:ring-2 focus:ring-liora-200"
         />
+      </div>
+
+      <div>
+        <label className="mb-2 block text-sm font-bold text-liora-900">
+          كام مجموعة تحبي تطلبي؟
+        </label>
+        <div className="grid grid-cols-3 gap-2">
+          {quantityOptions.map((option) => {
+            const selected = quantity === option.qty;
+            const savings = option.qty * 179 - option.price;
+            return (
+              <button
+                key={option.qty}
+                type="button"
+                onClick={() => setQuantity(option.qty)}
+                className={`relative flex flex-col items-center gap-1 rounded-xl border px-2 py-3 text-center transition ${
+                  savings > 0 ? "mt-2" : ""
+                } ${
+                  selected
+                    ? "border-liora-500 bg-liora-50 ring-2 ring-liora-200"
+                    : "border-liora-100"
+                }`}
+              >
+                {savings > 0 && (
+                  <span className="absolute -top-3 right-1/2 translate-x-1/2 rounded-full bg-gold-500 px-2 py-0.5 text-[10px] font-black text-liora-950 whitespace-nowrap">
+                    وفري {savings} ريال
+                  </span>
+                )}
+                <span className="text-sm font-bold text-liora-900">
+                  {option.label}
+                </span>
+                <span className="text-lg font-black text-liora-800">
+                  {option.price}
+                  <span className="text-xs font-bold"> ريال</span>
+                </span>
+                {option.popular && (
+                  <span className="mt-1 rounded-full bg-liora-100 px-2 py-0.5 text-[10px] font-black text-liora-700 whitespace-nowrap">
+                    ⭐ الأكثر طلباً
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <div>
