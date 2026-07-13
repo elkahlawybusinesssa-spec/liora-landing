@@ -1,10 +1,12 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { MessageCircle } from "lucide-react";
+import Image from "next/image";
 
 const WHATSAPP_NUMBER = "966501712904";
 const MESSAGE = "مرحباً، عندي سؤال عن مجموعة Liora التعليمية";
+const ICON_URL =
+  "https://ghckapztoiimrmxtadpx.supabase.co/storage/v1/object/public/catalog/catalog/icons/whatsapp_logo_icon-2.webp";
 
 export default function WhatsAppFloat() {
   return (
@@ -20,13 +22,19 @@ export default function WhatsAppFloat() {
       className="fixed bottom-24 left-4 z-50 flex flex-col items-center gap-1 md:bottom-6"
       aria-label="تواصلي معنا على واتساب"
     >
-      <span className="relative flex h-14 w-14 items-center justify-center rounded-full bg-green-500 text-white shadow-xl shadow-green-500/30">
+      <span className="relative flex h-14 w-14 items-center justify-center rounded-full shadow-xl shadow-green-500/30">
         <motion.span
           className="absolute inset-0 rounded-full bg-green-500"
           animate={{ scale: [1, 1.6], opacity: [0.5, 0] }}
           transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
         />
-        <MessageCircle size={28} className="relative" />
+        <Image
+          src={ICON_URL}
+          alt="واتساب"
+          width={56}
+          height={56}
+          className="relative h-14 w-14 rounded-full object-cover"
+        />
       </span>
       <span className="rounded-full bg-liora-950/80 px-2 py-0.5 text-center text-[10px] font-bold leading-tight text-white shadow">
         تواصل واتساب

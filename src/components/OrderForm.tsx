@@ -130,16 +130,16 @@ export default function OrderForm() {
                 type="button"
                 onClick={() => setQuantity(option.qty)}
                 className={`relative flex flex-col items-center gap-1 rounded-xl border px-2 py-3 text-center transition ${
-                  option.popular ? "mt-2" : ""
+                  savings > 0 ? "mt-2" : ""
                 } ${
                   selected
                     ? "border-liora-500 bg-liora-50 ring-2 ring-liora-200"
                     : "border-liora-100"
                 }`}
               >
-                {option.popular && (
+                {savings > 0 && (
                   <span className="absolute -top-3 right-1/2 translate-x-1/2 rounded-full bg-gold-500 px-2 py-0.5 text-[10px] font-black text-liora-950 whitespace-nowrap">
-                    ⭐ الأكثر طلباً
+                    وفري {savings} ريال
                   </span>
                 )}
                 <span className="text-sm font-bold text-liora-900">
@@ -149,9 +149,9 @@ export default function OrderForm() {
                   {option.price}
                   <span className="text-xs font-bold"> ريال</span>
                 </span>
-                {savings > 0 && (
+                {option.popular && (
                   <span className="text-[10px] font-bold text-liora-600">
-                    وفري {savings} ريال
+                    ⭐ الأكثر طلباً
                   </span>
                 )}
               </button>
