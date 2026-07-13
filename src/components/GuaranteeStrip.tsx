@@ -9,7 +9,7 @@ const items = [
 
 export default function GuaranteeStrip() {
   return (
-    <section className="bg-liora-900 py-10 text-white">
+    <section className="bg-gradient-to-b from-liora-950 via-liora-800 to-liora-700 py-10 text-white">
       <div className="mx-auto grid max-w-6xl grid-cols-3 gap-2 px-4 sm:gap-6 sm:px-5">
         {items.map((item, i) => (
           <AnimatedSection
