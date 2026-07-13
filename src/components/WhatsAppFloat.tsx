@@ -17,15 +17,22 @@ export default function WhatsAppFloat() {
       transition={{ delay: 1.5, type: "spring", stiffness: 200, damping: 14 }}
       whileHover={{ scale: 1.08 }}
       whileTap={{ scale: 0.95 }}
-      className="fixed bottom-24 left-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-green-500 text-white shadow-xl shadow-green-500/30 md:bottom-6"
+      className="fixed bottom-24 left-4 z-50 flex flex-col items-center gap-1 md:bottom-6"
       aria-label="تواصلي معنا على واتساب"
     >
-      <motion.span
-        className="absolute inset-0 rounded-full bg-green-500"
-        animate={{ scale: [1, 1.6], opacity: [0.5, 0] }}
-        transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
-      />
-      <MessageCircle size={28} className="relative" />
+      <span className="relative flex h-14 w-14 items-center justify-center rounded-full bg-green-500 text-white shadow-xl shadow-green-500/30">
+        <motion.span
+          className="absolute inset-0 rounded-full bg-green-500"
+          animate={{ scale: [1, 1.6], opacity: [0.5, 0] }}
+          transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
+        />
+        <MessageCircle size={28} className="relative" />
+      </span>
+      <span className="rounded-full bg-liora-950/80 px-2 py-0.5 text-center text-[10px] font-bold leading-tight text-white shadow">
+        تواصل واتساب
+        <br />
+        للاستفسارات
+      </span>
     </motion.a>
   );
 }

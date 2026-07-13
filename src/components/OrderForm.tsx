@@ -6,7 +6,11 @@ import { motion } from "framer-motion";
 import { Loader2, Check } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
-const PRODUCT_PRICE = 179;
+const quantityOptions = [
+  { qty: 1, price: 179, label: "مجموعة واحدة" },
+  { qty: 2, price: 310, label: "مجموعتين" },
+  { qty: 3, price: 450, label: "3 مجموعات" },
+];
 
 const shippingOptions = [
   {
@@ -42,11 +46,14 @@ export default function OrderForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [phone, setPhone] = useState("");
+  const [quantity, setQuantity] = useState(1);
   const [shippingMethod, setShippingMethod] = useState<"pickup" | "delivery">("pickup");
 
+  const selectedTier =
+    quantityOptions.find((q) => q.qty === quantity) ?? quantityOptions[0];
   const shippingCost =
     shippingOptions.find((s) => s.id === shippingMethod)?.cost ?? 0;
-  const total = PRODUCT_PRICE + shippingCost;
+  const total = selectedTier.price + shippingCost;
 
   function handlePhoneChange(e: React.ChangeEvent<HTMLInputElement>) {
     const westernized = e.target.value.replace(
@@ -84,7 +91,8 @@ export default function OrderForm() {
       city,
       address,
       notes: notes || null,
-      price: PRODUCT_PRICE,
+      price: selectedTier.price,
+      quantity: selectedTier.qty,
       shipping_method: shippingMethod,
       shipping_cost: shippingCost,
       source: "website",
@@ -108,6 +116,43 @@ export default function OrderForm() {
       transition={{ duration: 0.6 }}
       className="mx-auto mt-8 w-full max-w-md space-y-4 rounded-3xl bg-white p-6 text-right shadow-2xl"
     >
+      <div>
+        <label className="mb-2 block text-sm font-bold text-liora-900">
+          كام مجموعة تحبي تطلبي؟
+        </label>
+        <div className="grid grid-cols-3 gap-2">
+          {quantityOptions.map((option) => {
+            const selected = quantity === option.qty;
+            const savings = option.qty * 179 - option.price;
+            return (
+              <button
+                key={option.qty}
+                type="button"
+                onClick={() => setQuantity(option.qty)}
+                className={`relative flex flex-col items-center gap-1 rounded-xl border px-2 py-3 text-center transition ${
+                  selected
+                    ? "border-liora-500 bg-liora-50 ring-2 ring-liora-200"
+                    : "border-liora-100"
+                }`}
+              >
+                {savings > 0 && (
+                  <span className="absolute -top-2 right-1/2 translate-x-1/2 rounded-full bg-gold-500 px-2 py-0.5 text-[10px] font-black text-liora-950 whitespace-nowrap">
+                    وفري {savings} ريال
+                  </span>
+                )}
+                <span className="text-sm font-bold text-liora-900">
+                  {option.label}
+                </span>
+                <span className="text-lg font-black text-liora-800">
+                  {option.price}
+                  <span className="text-xs font-bold"> ريال</span>
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       <div>
         <label className="mb-1 block text-sm font-bold text-liora-900">
           الاسم الكامل
