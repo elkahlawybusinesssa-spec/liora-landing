@@ -5,15 +5,31 @@ import { X } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { STATUS_OPTIONS } from "@/lib/orderStatus";
 
-export default function AddOrderModal({
+interface EditableOrder {
+  id: string;
+  full_name: string;
+  phone: string;
+  product: string | null;
+  price: number | null;
+  city: string;
+  address: string;
+  status: string;
+  source: string | null;
+  notes: string | null;
+}
+
+export default function OrderModal({
+  order,
   onClose,
-  onAdded,
+  onSaved,
 }: {
+  order?: EditableOrder | null;
   onClose: () => void;
-  onAdded: () => void;
+  onSaved: () => void;
 }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const isEdit = !!order;
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -35,8 +51,7 @@ export default function AddOrderModal({
       return;
     }
 
-    setSaving(true);
-    const { error: insertError } = await supabase.from("orders").insert({
+    const payload = {
       full_name,
       phone,
       product,
@@ -46,15 +61,20 @@ export default function AddOrderModal({
       status,
       source,
       notes: notes || null,
-    });
+    };
+
+    setSaving(true);
+    const { error: saveError } = isEdit
+      ? await supabase.from("orders").update(payload).eq("id", order!.id)
+      : await supabase.from("orders").insert(payload);
     setSaving(false);
 
-    if (insertError) {
+    if (saveError) {
       setError("صار خطأ أثناء حفظ الطلب");
       return;
     }
 
-    onAdded();
+    onSaved();
     onClose();
   }
 
@@ -70,7 +90,9 @@ export default function AddOrderModal({
         dir="rtl"
       >
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-black text-liora-900">إضافة طلب يدوي</h2>
+          <h2 className="text-lg font-black text-liora-900">
+            {isEdit ? "تعديل الطلب" : "إضافة طلب يدوي"}
+          </h2>
           <button
             type="button"
             onClick={onClose}
@@ -88,6 +110,7 @@ export default function AddOrderModal({
             <input
               name="full_name"
               required
+              defaultValue={order?.full_name}
               className="w-full rounded-xl border border-liora-100 px-3 py-2 outline-none focus:border-liora-500"
             />
           </div>
@@ -100,6 +123,7 @@ export default function AddOrderModal({
               name="phone"
               required
               dir="ltr"
+              defaultValue={order?.phone}
               className="w-full rounded-xl border border-liora-100 px-3 py-2 outline-none focus:border-liora-500"
             />
           </div>
@@ -110,7 +134,7 @@ export default function AddOrderModal({
             </label>
             <input
               name="product"
-              defaultValue="مجموعة Liora التعليمية"
+              defaultValue={order?.product ?? "مجموعة Liora التعليمية"}
               className="w-full rounded-xl border border-liora-100 px-3 py-2 outline-none focus:border-liora-500"
             />
           </div>
@@ -122,7 +146,7 @@ export default function AddOrderModal({
             <input
               name="price"
               type="number"
-              defaultValue={179}
+              defaultValue={order?.price ?? 179}
               dir="ltr"
               className="w-full rounded-xl border border-liora-100 px-3 py-2 outline-none focus:border-liora-500"
             />
@@ -134,6 +158,7 @@ export default function AddOrderModal({
             </label>
             <input
               name="city"
+              defaultValue={order?.city}
               className="w-full rounded-xl border border-liora-100 px-3 py-2 outline-none focus:border-liora-500"
             />
           </div>
@@ -144,6 +169,7 @@ export default function AddOrderModal({
             </label>
             <input
               name="address"
+              defaultValue={order?.address}
               className="w-full rounded-xl border border-liora-100 px-3 py-2 outline-none focus:border-liora-500"
             />
           </div>
@@ -154,7 +180,7 @@ export default function AddOrderModal({
             </label>
             <select
               name="source"
-              defaultValue="whatsapp"
+              defaultValue={order?.source ?? "whatsapp"}
               className="w-full rounded-xl border border-liora-100 px-3 py-2 outline-none focus:border-liora-500"
             >
               <option value="whatsapp">واتساب</option>
@@ -168,7 +194,7 @@ export default function AddOrderModal({
             </label>
             <select
               name="status"
-              defaultValue="new"
+              defaultValue={order?.status ?? "new"}
               className="w-full rounded-xl border border-liora-100 px-3 py-2 outline-none focus:border-liora-500"
             >
               {STATUS_OPTIONS.map((s) => (
@@ -186,6 +212,7 @@ export default function AddOrderModal({
             <textarea
               name="notes"
               rows={2}
+              defaultValue={order?.notes ?? ""}
               className="w-full resize-none rounded-xl border border-liora-100 px-3 py-2 outline-none focus:border-liora-500"
             />
           </div>
@@ -202,7 +229,7 @@ export default function AddOrderModal({
           disabled={saving}
           className="mt-5 w-full rounded-full bg-liora-800 py-3 font-bold text-white transition hover:bg-liora-900 disabled:opacity-70"
         >
-          {saving ? "جارِ الحفظ..." : "حفظ الطلب"}
+          {saving ? "جارِ الحفظ..." : isEdit ? "حفظ التعديلات" : "حفظ الطلب"}
         </button>
       </form>
     </div>

@@ -3,11 +3,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { MessageCircle, RefreshCw, LogOut, BarChart3, Plus, Trash2, Globe } from "lucide-react";
+import { MessageCircle, RefreshCw, LogOut, BarChart3, Plus, Trash2, Globe, Pencil } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { toWhatsappLink } from "@/lib/phone";
 import { STATUS_OPTIONS } from "@/lib/orderStatus";
-import AddOrderModal from "@/components/AddOrderModal";
+import OrderModal from "@/components/OrderModal";
 
 interface Order {
   id: string;
@@ -43,6 +43,7 @@ export default function AdminOrdersPage() {
   const [error, setError] = useState("");
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingOrder, setEditingOrder] = useState<Order | null>(null);
 
   const loadOrders = useCallback(async () => {
     setError("");
@@ -206,6 +207,13 @@ export default function AdminOrdersPage() {
                   </a>
 
                   <button
+                    onClick={() => setEditingOrder(order)}
+                    className="flex items-center justify-center gap-2 rounded-full bg-white px-4 py-2.5 font-bold text-liora-800 shadow ring-1 ring-liora-100 transition hover:scale-105 hover:bg-liora-50"
+                  >
+                    <Pencil size={18} />
+                  </button>
+
+                  <button
                     onClick={() => handleDelete(order)}
                     className="flex items-center justify-center gap-2 rounded-full bg-white px-4 py-2.5 font-bold text-red-600 shadow ring-1 ring-red-200 transition hover:scale-105 hover:bg-red-50"
                   >
@@ -219,9 +227,17 @@ export default function AdminOrdersPage() {
       </div>
 
       {showAddModal && (
-        <AddOrderModal
+        <OrderModal
           onClose={() => setShowAddModal(false)}
-          onAdded={loadOrders}
+          onSaved={loadOrders}
+        />
+      )}
+
+      {editingOrder && (
+        <OrderModal
+          order={editingOrder}
+          onClose={() => setEditingOrder(null)}
+          onSaved={loadOrders}
         />
       )}
     </main>
