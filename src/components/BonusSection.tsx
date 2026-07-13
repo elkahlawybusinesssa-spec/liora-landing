@@ -56,7 +56,7 @@ export default function BonusSection() {
         </motion.div>
 
         <div className="-mx-5">
-          <ReviewMarquee images={giftShots} reverse />
+          <ReviewMarquee images={giftShots} />
         </div>
 
         <motion.a
