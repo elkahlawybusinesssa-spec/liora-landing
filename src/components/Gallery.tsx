@@ -71,13 +71,13 @@ export default function Gallery() {
             {loop.map((src, i) => (
               <div
                 key={i}
-                className="h-72 w-56 flex-shrink-0 overflow-hidden rounded-3xl shadow-lg sm:h-96 sm:w-72"
+                className="aspect-[1448/1086] w-72 flex-shrink-0 overflow-hidden rounded-3xl shadow-lg sm:w-[420px]"
               >
                 <Image
                   src={src}
                   alt="مجموعة Liora على الطبيعة"
-                  width={500}
-                  height={650}
+                  width={1448}
+                  height={1086}
                   draggable={false}
                   className="h-full w-full object-cover"
                 />
