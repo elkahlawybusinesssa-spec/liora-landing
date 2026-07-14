@@ -27,7 +27,7 @@ export default function OrderForm() {
   const [error, setError] = useState("");
   const [phone, setPhone] = useState("");
   const [quantity, setQuantity] = useState(1);
-  const [shippingMethod, setShippingMethod] = useState<"pickup" | "delivery">("pickup");
+  const [shippingMethod] = useState<"delivery">("delivery");
   const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SETTINGS);
 
   useEffect(() => {
@@ -41,12 +41,6 @@ export default function OrderForm() {
   ];
 
   const shippingOptions = [
-    {
-      id: "pickup" as const,
-      label: settings.shipping_pickup_label,
-      note: settings.shipping_pickup_note,
-      cost: settings.shipping_pickup_cost,
-    },
     {
       id: "delivery" as const,
       label: settings.shipping_delivery_label,
