@@ -47,14 +47,14 @@ export default function OrderForm() {
       price: settings.price_2,
       label: "مجموعتين",
       popular: true,
-      contents: "10 كتب + 10 أقلام هدية + 8 هدايا إضافية",
+      contents: "10 كتب + 10 أقلام هدية + 16 هدية إضافية",
     },
     {
       qty: 3,
       price: settings.price_3,
       label: "3 مجموعات",
       popular: false,
-      contents: "15 كتاب + 15 قلم هدية + 8 هدايا إضافية",
+      contents: "15 كتاب + 15 قلم هدية + 24 هدية إضافية",
     },
   ];
 
