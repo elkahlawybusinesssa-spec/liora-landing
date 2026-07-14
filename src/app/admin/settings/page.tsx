@@ -136,47 +136,7 @@ export default function SiteSettingsPage() {
 
           <div className="border-t border-liora-100 pt-6">
             <h2 className="mb-3 text-lg font-black text-liora-900">
-              طريقة الشحن الأولى (الاستلام)
-            </h2>
-            <div className="space-y-3">
-              <div>
-                <label className="mb-1 block text-sm font-bold text-liora-900">
-                  العنوان
-                </label>
-                <input
-                  value={settings.shipping_pickup_label}
-                  onChange={(e) => update("shipping_pickup_label", e.target.value)}
-                  className="w-full rounded-xl border border-liora-100 px-3 py-2 outline-none focus:border-liora-500"
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-sm font-bold text-liora-900">
-                  ملاحظة صغيرة
-                </label>
-                <input
-                  value={settings.shipping_pickup_note}
-                  onChange={(e) => update("shipping_pickup_note", e.target.value)}
-                  className="w-full rounded-xl border border-liora-100 px-3 py-2 outline-none focus:border-liora-500"
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-sm font-bold text-liora-900">
-                  التكلفة (ريال) — 0 يعني مجاني
-                </label>
-                <input
-                  type="number"
-                  dir="ltr"
-                  value={settings.shipping_pickup_cost}
-                  onChange={(e) => update("shipping_pickup_cost", Number(e.target.value))}
-                  className="w-full rounded-xl border border-liora-100 px-3 py-2 outline-none focus:border-liora-500"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="border-t border-liora-100 pt-6">
-            <h2 className="mb-3 text-lg font-black text-liora-900">
-              طريقة الشحن الثانية (توصيل للمنزل)
+              طريقة الشحن (توصيل للمنزل)
             </h2>
             <div className="space-y-3">
               <div>

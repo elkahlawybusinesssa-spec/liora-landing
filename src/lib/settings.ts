@@ -5,9 +5,6 @@ export interface SiteSettings {
   price_1: number;
   price_2: number;
   price_3: number;
-  shipping_pickup_label: string;
-  shipping_pickup_note: string;
-  shipping_pickup_cost: number;
   shipping_delivery_label: string;
   shipping_delivery_cost: number;
 }
@@ -17,9 +14,6 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   price_1: 179,
   price_2: 310,
   price_3: 450,
-  shipping_pickup_label: "مجاني لأقرب نقطة استلام ريدبوكس",
-  shipping_pickup_note: "سيتم التواصل معكم وإفادتكم بأقرب نقطة",
-  shipping_pickup_cost: 0,
   shipping_delivery_label: "الشحن إلى باب المنزل",
   shipping_delivery_cost: 20,
 };
@@ -38,9 +32,6 @@ export async function fetchSiteSettings(): Promise<SiteSettings> {
     price_1: Number(data.price_1),
     price_2: Number(data.price_2),
     price_3: Number(data.price_3),
-    shipping_pickup_label: data.shipping_pickup_label,
-    shipping_pickup_note: data.shipping_pickup_note,
-    shipping_pickup_cost: Number(data.shipping_pickup_cost),
     shipping_delivery_label: data.shipping_delivery_label,
     shipping_delivery_cost: Number(data.shipping_delivery_cost),
   };
