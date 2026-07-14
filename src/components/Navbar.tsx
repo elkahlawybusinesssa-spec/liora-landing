@@ -16,7 +16,7 @@ export default function Navbar() {
           Liora<span className="text-gold-500">.</span>
         </span>
         <a
-          href="#order"
+          href="/#order"
           onClick={() => trackInitiateCheckout()}
           className="rounded-full bg-liora-800 px-5 py-2 text-sm font-bold text-white shadow-md shadow-liora-800/20 transition hover:scale-105 hover:bg-liora-900"
         >
