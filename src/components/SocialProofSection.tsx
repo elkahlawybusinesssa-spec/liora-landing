@@ -10,7 +10,6 @@ const productShots = [
   `${STORAGE_BASE}/numbers-en/1.webp`,
   `${STORAGE_BASE}/Letters-ar/1.webp`,
   `${STORAGE_BASE}/numbers-ar/1.webp`,
-  ...Array.from({ length: 8 }, (_, i) => `${STORAGE_BASE}/gifts/${i + 1}.webp`),
 ];
 
 export default function SocialProofSection() {
