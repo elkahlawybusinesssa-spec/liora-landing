@@ -34,8 +34,8 @@ export default function FinalCTA() {
           </h2>
 
           <div className="mt-5 flex items-center justify-center gap-3 md:justify-start">
-            <span className="text-lg text-liora-200 line-through">{settings.original_price} ريال</span>
             <span className="text-4xl font-black text-gold-400">{settings.price_1} ريال</span>
+            <span className="text-lg text-liora-200 line-through">بدلاً من {settings.original_price} ريال</span>
           </div>
           <p className="mt-1 text-sm text-liora-200">
             + 8 هدايا مجانية لفترة محدودة
