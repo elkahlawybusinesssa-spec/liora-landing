@@ -35,9 +35,27 @@ export default function OrderForm() {
   }, []);
 
   const quantityOptions = [
-    { qty: 1, price: settings.price_1, label: "مجموعة واحدة", popular: false },
-    { qty: 2, price: settings.price_2, label: "مجموعتين", popular: true },
-    { qty: 3, price: settings.price_3, label: "3 مجموعات", popular: false },
+    {
+      qty: 1,
+      price: settings.price_1,
+      label: "مجموعة واحدة",
+      popular: false,
+      contents: "5 كتب + 5 أقلام هدية + 8 هدايا إضافية",
+    },
+    {
+      qty: 2,
+      price: settings.price_2,
+      label: "مجموعتين",
+      popular: true,
+      contents: "10 كتب + 10 أقلام هدية + 8 هدايا إضافية",
+    },
+    {
+      qty: 3,
+      price: settings.price_3,
+      label: "3 مجموعات",
+      popular: false,
+      contents: "15 كتاب + 15 قلم هدية + 8 هدايا إضافية",
+    },
   ];
 
   const shippingOptions = [
@@ -224,6 +242,9 @@ export default function OrderForm() {
                 )}
                 <span className="text-sm font-bold text-liora-900">
                   {option.label}
+                </span>
+                <span className="text-[10px] leading-tight text-liora-500">
+                  {option.contents}
                 </span>
                 <span className="text-lg font-black text-liora-800">
                   {option.price}
