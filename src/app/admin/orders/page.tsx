@@ -8,6 +8,7 @@ import { supabase } from "@/lib/supabase";
 import { toWhatsappLink } from "@/lib/phone";
 import { STATUS_OPTIONS } from "@/lib/orderStatus";
 import OrderModal from "@/components/OrderModal";
+import DateRangeFilter, { DateRange } from "@/components/DateRangeFilter";
 
 interface Order {
   id: string;
@@ -44,6 +45,7 @@ export default function AdminOrdersPage() {
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
+  const [dateRange, setDateRange] = useState<DateRange>({ from: null, to: null });
 
   const loadOrders = useCallback(async () => {
     setError("");
@@ -89,6 +91,14 @@ export default function AdminOrdersPage() {
     await supabase.from("orders").delete().eq("id", order.id);
   }
 
+  const filteredOrders =
+    orders?.filter((o) => {
+      const created = o.created_at.slice(0, 10);
+      if (dateRange.from && created < dateRange.from) return false;
+      if (dateRange.to && created > dateRange.to) return false;
+      return true;
+    }) ?? null;
+
   if (checkingAuth) return null;
 
   return (
@@ -96,7 +106,7 @@ export default function AdminOrdersPage() {
       <div className="mx-auto max-w-5xl">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-black text-liora-900">
-            طلبات العملاء {orders ? `(${orders.length})` : ""}
+            طلبات العملاء {filteredOrders ? `(${filteredOrders.length})` : ""}
           </h1>
           <div className="flex flex-wrap gap-2">
             <button
@@ -137,19 +147,23 @@ export default function AdminOrdersPage() {
           </div>
         </div>
 
+        <div className="mt-4">
+          <DateRangeFilter value={dateRange} onChange={setDateRange} />
+        </div>
+
         {error && (
           <p className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600">
             {error}
           </p>
         )}
 
-        {!orders ? (
+        {!filteredOrders ? (
           <p className="mt-8 text-center text-liora-700">جارِ التحميل...</p>
-        ) : orders.length === 0 ? (
-          <p className="mt-8 text-center text-liora-700">لا توجد طلبات بعد</p>
+        ) : filteredOrders.length === 0 ? (
+          <p className="mt-8 text-center text-liora-700">لا توجد طلبات في الفترة دي</p>
         ) : (
           <div className="mt-6 space-y-3">
-            {orders.map((order) => (
+            {filteredOrders.map((order) => (
               <div
                 key={order.id}
                 className="flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-liora-100 sm:flex-row sm:items-center sm:justify-between"

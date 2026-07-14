@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -12,8 +12,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-
-const UNIT_PRICE = 179;
+import DateRangeFilter, { DateRange } from "@/components/DateRangeFilter";
 
 interface Stats {
   visits: number;
@@ -28,37 +27,65 @@ export default function AnalyticsPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [error, setError] = useState("");
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const [dateRange, setDateRange] = useState<DateRange>({ from: null, to: null });
+
+  const loadStats = useCallback(async (range: DateRange) => {
+    setError("");
+    setStats(null);
+
+    let visitsQuery = supabase
+      .from("page_views")
+      .select("*", { count: "exact", head: true });
+    let ordersQuery = supabase.from("orders").select("price, created_at");
+
+    if (range.from) {
+      visitsQuery = visitsQuery.gte("created_at", range.from);
+      ordersQuery = ordersQuery.gte("created_at", range.from);
+    }
+    if (range.to) {
+      const toEnd = `${range.to}T23:59:59.999`;
+      visitsQuery = visitsQuery.lte("created_at", toEnd);
+      ordersQuery = ordersQuery.lte("created_at", toEnd);
+    }
+
+    const [{ count: visits, error: visitsError }, { data: ordersData, error: ordersError }] =
+      await Promise.all([visitsQuery, ordersQuery]);
+
+    if (visitsError || ordersError) {
+      setError("تعذر تحميل الإحصائيات");
+      return;
+    }
+
+    const v = visits ?? 0;
+    const orders = ordersData ?? [];
+    const o = orders.length;
+    const totalSales = orders.reduce((sum, ord) => sum + Number(ord.price ?? 0), 0);
+
+    setStats({
+      visits: v,
+      orders: o,
+      avgOrderValue: o > 0 ? Math.round(totalSales / o) : 0,
+      conversionRate: v > 0 ? (o / v) * 100 : 0,
+      totalSales,
+    });
+  }, []);
 
   useEffect(() => {
-    supabase.auth.getSession().then(async ({ data }) => {
+    supabase.auth.getSession().then(({ data }) => {
       if (!data.session) {
         router.replace("/admin");
         return;
       }
       setCheckingAuth(false);
-
-      const [{ count: visits, error: visitsError }, { count: orders, error: ordersError }] =
-        await Promise.all([
-          supabase.from("page_views").select("*", { count: "exact", head: true }),
-          supabase.from("orders").select("*", { count: "exact", head: true }),
-        ]);
-
-      if (visitsError || ordersError) {
-        setError("تعذر تحميل الإحصائيات");
-        return;
-      }
-
-      const v = visits ?? 0;
-      const o = orders ?? 0;
-      setStats({
-        visits: v,
-        orders: o,
-        avgOrderValue: o > 0 ? UNIT_PRICE : 0,
-        conversionRate: v > 0 ? (o / v) * 100 : 0,
-        totalSales: o * UNIT_PRICE,
-      });
+      loadStats(dateRange);
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router]);
+
+  useEffect(() => {
+    if (!checkingAuth) loadStats(dateRange);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dateRange]);
 
   if (checkingAuth) return null;
 
@@ -96,6 +123,10 @@ export default function AnalyticsPage() {
             <ArrowRight size={16} />
             رجوع للطلبات
           </Link>
+        </div>
+
+        <div className="mt-4">
+          <DateRangeFilter value={dateRange} onChange={setDateRange} />
         </div>
 
         {error && (
