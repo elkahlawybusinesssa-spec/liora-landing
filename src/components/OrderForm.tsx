@@ -248,10 +248,8 @@ export default function OrderForm() {
           {shippingOptions.map((option) => {
             const selected = shippingMethod === option.id;
             return (
-              <button
+              <div
                 key={option.id}
-                type="button"
-                onClick={() => setShippingMethod(option.id)}
                 className={`flex w-full items-center justify-between gap-3 rounded-xl border px-4 py-3 text-right transition ${
                   selected
                     ? "border-liora-500 bg-liora-50 ring-2 ring-liora-200"
@@ -282,7 +280,7 @@ export default function OrderForm() {
                 <span className="flex-shrink-0 text-sm font-bold text-liora-800">
                   {option.cost === 0 ? "مجاني" : `${option.cost} ريال`}
                 </span>
-              </button>
+              </div>
             );
           })}
         </div>
