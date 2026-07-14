@@ -11,17 +11,19 @@ const sparkles = Array.from({ length: 10 });
 export default function ThankYouContent({
   name,
   trackConversion,
+  value,
 }: {
   name: string;
   trackConversion: boolean;
+  value?: number;
 }) {
   const fired = useRef(false);
 
   useEffect(() => {
     if (!trackConversion || fired.current) return;
     fired.current = true;
-    trackOrderConversion();
-  }, [trackConversion]);
+    trackOrderConversion(value);
+  }, [trackConversion, value]);
 
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-liora-950 via-liora-800 to-liora-700 px-5 py-16 text-center text-white">

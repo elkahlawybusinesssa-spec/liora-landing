@@ -8,12 +8,13 @@ export const metadata: Metadata = {
 export default function ShokranPage({
   searchParams,
 }: {
-  searchParams: { name?: string; conv?: string };
+  searchParams: { name?: string; conv?: string; value?: string };
 }) {
   return (
     <ThankYouContent
       name={searchParams.name ?? ""}
       trackConversion={searchParams.conv === "1"}
+      value={searchParams.value ? Number(searchParams.value) : undefined}
     />
   );
 }

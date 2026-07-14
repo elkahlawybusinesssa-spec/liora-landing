@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { MessageCircle, RefreshCw, LogOut, BarChart3, Plus, Trash2, Globe, Pencil } from "lucide-react";
+import { MessageCircle, RefreshCw, LogOut, BarChart3, Plus, Trash2, Globe, Pencil, Settings } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { toWhatsappLink } from "@/lib/phone";
 import { STATUS_OPTIONS } from "@/lib/orderStatus";
@@ -112,6 +112,13 @@ export default function AdminOrdersPage() {
             >
               <BarChart3 size={16} />
               التحليلات
+            </Link>
+            <Link
+              href="/admin/settings"
+              className="flex items-center gap-2 rounded-full bg-liora-800 px-4 py-2 text-sm font-bold text-white shadow"
+            >
+              <Settings size={16} />
+              الأسعار والشحن
             </Link>
             <button
               onClick={loadOrders}

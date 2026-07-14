@@ -9,23 +9,23 @@ declare global {
 const ORDER_VALUE = 179;
 const CURRENCY = "SAR";
 
-export function trackOrderConversion() {
+export function trackOrderConversion(value: number = ORDER_VALUE) {
   if (typeof window === "undefined") return;
 
   window.fbq?.("track", "Purchase", {
-    value: ORDER_VALUE,
+    value,
     currency: CURRENCY,
     content_name: "Liora Educational Set",
   });
 
   window.ttq?.track("PlaceAnOrder", {
-    value: ORDER_VALUE,
+    value,
     currency: CURRENCY,
     content_name: "Liora Educational Set",
   });
 
   window.snaptr?.("track", "PURCHASE", {
-    price: ORDER_VALUE,
+    price: value,
     currency: CURRENCY,
   });
 }

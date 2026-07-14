@@ -1,11 +1,19 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 import OrderForm from "./OrderForm";
 import { trackInitiateCheckout } from "@/lib/pixels";
+import { fetchSiteSettings, DEFAULT_SETTINGS, SiteSettings } from "@/lib/settings";
 
 export default function FinalCTA() {
+  const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SETTINGS);
+
+  useEffect(() => {
+    fetchSiteSettings().then(setSettings);
+  }, []);
+
   return (
     <section
       id="order"
@@ -26,8 +34,8 @@ export default function FinalCTA() {
           </h2>
 
           <div className="mt-5 flex items-center justify-center gap-3 md:justify-start">
-            <span className="text-lg text-liora-200 line-through">299 ريال</span>
-            <span className="text-4xl font-black text-gold-400">179 ريال</span>
+            <span className="text-lg text-liora-200 line-through">{settings.original_price} ريال</span>
+            <span className="text-4xl font-black text-gold-400">{settings.price_1} ريال</span>
           </div>
           <p className="mt-1 text-sm text-liora-200">
             + 8 هدايا مجانية لفترة محدودة

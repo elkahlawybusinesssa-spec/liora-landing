@@ -1,31 +1,11 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useEffect, useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Loader2, Check } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-
-const quantityOptions = [
-  { qty: 1, price: 179, label: "مجموعة واحدة", popular: false },
-  { qty: 2, price: 310, label: "مجموعتين", popular: true },
-  { qty: 3, price: 450, label: "3 مجموعات", popular: false },
-];
-
-const shippingOptions = [
-  {
-    id: "pickup",
-    label: "مجاني لأقرب نقطة استلام ريدبوكس",
-    note: "سيتم التواصل معكم وإفادتكم بأقرب نقطة",
-    cost: 0,
-  },
-  {
-    id: "delivery",
-    label: "الشحن إلى باب المنزل",
-    note: "",
-    cost: 20,
-  },
-];
+import { fetchSiteSettings, DEFAULT_SETTINGS, SiteSettings } from "@/lib/settings";
 
 const cities = [
   "الرياض",
@@ -48,6 +28,32 @@ export default function OrderForm() {
   const [phone, setPhone] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [shippingMethod, setShippingMethod] = useState<"pickup" | "delivery">("pickup");
+  const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SETTINGS);
+
+  useEffect(() => {
+    fetchSiteSettings().then(setSettings);
+  }, []);
+
+  const quantityOptions = [
+    { qty: 1, price: settings.price_1, label: "مجموعة واحدة", popular: false },
+    { qty: 2, price: settings.price_2, label: "مجموعتين", popular: true },
+    { qty: 3, price: settings.price_3, label: "3 مجموعات", popular: false },
+  ];
+
+  const shippingOptions = [
+    {
+      id: "pickup" as const,
+      label: settings.shipping_pickup_label,
+      note: settings.shipping_pickup_note,
+      cost: settings.shipping_pickup_cost,
+    },
+    {
+      id: "delivery" as const,
+      label: settings.shipping_delivery_label,
+      note: "",
+      cost: settings.shipping_delivery_cost,
+    },
+  ];
 
   const selectedTier =
     quantityOptions.find((q) => q.qty === quantity) ?? quantityOptions[0];
@@ -104,7 +110,9 @@ export default function OrderForm() {
       return;
     }
 
-    router.push(`/shokran?name=${encodeURIComponent(full_name)}&conv=1`);
+    router.push(
+      `/shokran?name=${encodeURIComponent(full_name)}&conv=1&value=${total}`
+    );
   }
 
   return (
@@ -201,7 +209,7 @@ export default function OrderForm() {
         <div className="grid grid-cols-3 gap-2">
           {quantityOptions.map((option) => {
             const selected = quantity === option.qty;
-            const savings = option.qty * 179 - option.price;
+            const savings = option.qty * settings.price_1 - option.price;
             return (
               <button
                 key={option.qty}
@@ -249,7 +257,7 @@ export default function OrderForm() {
               <button
                 key={option.id}
                 type="button"
-                onClick={() => setShippingMethod(option.id as "pickup" | "delivery")}
+                onClick={() => setShippingMethod(option.id)}
                 className={`flex w-full items-center justify-between gap-3 rounded-xl border px-4 py-3 text-right transition ${
                   selected
                     ? "border-liora-500 bg-liora-50 ring-2 ring-liora-200"
