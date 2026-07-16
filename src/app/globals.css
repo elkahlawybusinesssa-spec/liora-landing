@@ -49,3 +49,7 @@ body {
 .protected-page img {
   pointer-events: none;
 }
+
+.protected-page img.draggable-media {
+  pointer-events: auto;
+}

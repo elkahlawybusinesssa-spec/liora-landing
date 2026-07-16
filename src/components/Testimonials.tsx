@@ -77,7 +77,7 @@ export default function Testimonials() {
                   width={56}
                   height={56}
                   draggable={false}
-                  className="mx-auto h-14 w-14 rounded-full object-cover ring-2 ring-liora-100"
+                  className="draggable-media mx-auto h-14 w-14 rounded-full object-cover ring-2 ring-liora-100"
                 />
                 <p className="mt-3 font-bold text-liora-900">
                   {t.name} — {t.city}

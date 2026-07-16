@@ -80,7 +80,7 @@ export default function Gallery() {
                   width={1448}
                   height={1086}
                   draggable={false}
-                  className="h-full w-full object-cover"
+                  className="draggable-media h-full w-full object-cover"
                 />
               </div>
             ))}

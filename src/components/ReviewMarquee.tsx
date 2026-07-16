@@ -72,7 +72,7 @@ export default function ReviewMarquee({
                 width={200}
                 height={260}
                 draggable={false}
-                className="h-full w-full object-cover"
+                className="draggable-media h-full w-full object-cover"
               />
             </div>
             {captionLoop && (
