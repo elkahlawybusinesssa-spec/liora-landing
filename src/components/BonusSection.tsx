@@ -28,7 +28,7 @@ const giftCaptions = [
 
 export default function BonusSection() {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-liora-50 to-white py-16">
+    <section id="gifts" className="relative overflow-hidden bg-gradient-to-b from-liora-50 to-white py-16">
       <GiftBurst />
       <AnimatedSection className="mx-auto max-w-3xl px-5 text-center">
         <motion.div
