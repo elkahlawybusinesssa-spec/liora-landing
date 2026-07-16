@@ -1,8 +1,8 @@
-import { Clock, Truck, Banknote } from "lucide-react";
+import { Clock, ShieldCheck, Banknote } from "lucide-react";
 
 const items = [
   { icon: Clock, text: "لفترة محدودة" },
-  { icon: Truck, text: "شحن مجاني" },
+  { icon: ShieldCheck, text: "ضمان حق المعاينة قبل الدفع" },
   { icon: Banknote, text: "الدفع عند الاستلام" },
 ];
 
