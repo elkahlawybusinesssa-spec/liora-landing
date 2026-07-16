@@ -53,10 +53,11 @@ export default function ReviewMarquee({
         ref={trackRef}
         dir="ltr"
         className="flex w-max cursor-grab gap-4 active:cursor-grabbing"
-        style={{ x }}
+        style={{ x, touchAction: "pan-y" }}
         drag="x"
         dragConstraints={{ left: -Infinity, right: Infinity }}
         dragElastic={0.05}
+        dragMomentum={false}
         onDragStart={() => {
           isDragging.current = true;
         }}
