@@ -14,7 +14,7 @@ export default function GiftBadge() {
 
   useEffect(() => {
     if (!visible) return;
-    const hideTimer = setTimeout(() => setVisible(false), 15000);
+    const hideTimer = setTimeout(() => setVisible(false), 10000);
     return () => clearTimeout(hideTimer);
   }, [visible]);
 
