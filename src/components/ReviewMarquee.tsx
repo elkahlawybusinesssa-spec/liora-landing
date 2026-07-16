@@ -12,12 +12,15 @@ const SPEED_PX_PER_SEC = 45;
 
 export default function ReviewMarquee({
   images,
+  captions,
   reverse = false,
 }: {
   images: string[];
+  captions?: string[];
   reverse?: boolean;
 }) {
   const loop = [...images, ...images];
+  const captionLoop = captions ? [...captions, ...captions] : null;
   const trackRef = useRef<HTMLDivElement>(null);
   const x = useMotionValue(0);
   const isDragging = useRef(false);
@@ -60,18 +63,22 @@ export default function ReviewMarquee({
         onDragEnd={handleDragEnd}
       >
         {loop.map((src, i) => (
-          <div
-            key={i}
-            className="h-40 w-32 flex-shrink-0 overflow-hidden rounded-2xl shadow-md ring-1 ring-liora-100 sm:h-48 sm:w-36"
-          >
-            <Image
-              src={src}
-              alt="مجموعة Liora"
-              width={200}
-              height={260}
-              draggable={false}
-              className="h-full w-full object-cover"
-            />
+          <div key={i} className="flex w-32 flex-shrink-0 flex-col gap-1.5 sm:w-36">
+            <div className="h-40 w-32 overflow-hidden rounded-2xl shadow-md ring-1 ring-liora-100 sm:h-48 sm:w-36">
+              <Image
+                src={src}
+                alt={captionLoop ? captionLoop[i] : "مجموعة Liora"}
+                width={200}
+                height={260}
+                draggable={false}
+                className="h-full w-full object-cover"
+              />
+            </div>
+            {captionLoop && (
+              <p dir="rtl" className="text-center text-xs font-bold text-liora-800">
+                {captionLoop[i]}
+              </p>
+            )}
           </div>
         ))}
       </motion.div>

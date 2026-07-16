@@ -15,6 +15,17 @@ const STORAGE_BASE =
 
 const giftShots = Array.from({ length: 8 }, (_, i) => `${STORAGE_BASE}/gifts/${i + 1}.webp`);
 
+const giftCaptions = [
+  "استيكرز تحفيزية",
+  "شهادة تقدير",
+  "جدول المتابعة",
+  "3 أقنعة ترفيهية",
+  "لوحة ABC",
+  "لوحة أ ب ت",
+  "لوحة ١٢٣",
+  "لوحة 123",
+];
+
 export default function BonusSection() {
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-liora-50 to-white py-16">
@@ -56,7 +67,7 @@ export default function BonusSection() {
         </motion.div>
 
         <div className="-mx-5">
-          <ReviewMarquee images={giftShots} />
+          <ReviewMarquee images={giftShots} captions={giftCaptions} />
         </div>
 
         <motion.a
