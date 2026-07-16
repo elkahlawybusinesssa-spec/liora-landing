@@ -66,7 +66,7 @@ export default function GiftBurst() {
   );
 
   return (
-    <div ref={ref} className="absolute inset-0 z-20">
+    <div ref={ref} className="pointer-events-none absolute inset-0 z-20">
       {mounted && overlay && createPortal(overlay, document.body)}
     </div>
   );
