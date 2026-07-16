@@ -14,7 +14,7 @@ export default function GiftBadge() {
 
   useEffect(() => {
     if (!visible) return;
-    const hideTimer = setTimeout(() => setVisible(false), 12000);
+    const hideTimer = setTimeout(() => setVisible(false), 15000);
     return () => clearTimeout(hideTimer);
   }, [visible]);
 
@@ -33,10 +33,10 @@ export default function GiftBadge() {
               <Gift size={16} />
             </span>
             <span className="flex-1">
-              <span className="block text-sm font-black leading-snug">
+              <span className="block whitespace-nowrap text-xs font-black leading-snug">
                 🎁 8 هدايا مجانية مع طلبك اليوم
               </span>
-              <span className="mt-1 block text-[10px] leading-relaxed text-liora-200">
+              <span className="mt-1 block text-[10px] leading-relaxed text-white">
                 استيكرات تحفيزية • شهادة تقدير • جدول متابعة
                 <br />
                 3 أقنعة ترفيهية • لوحات الحروف والأرقام
