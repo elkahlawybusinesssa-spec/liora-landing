@@ -26,7 +26,7 @@ export default function GiftBadge() {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -40, opacity: 0 }}
           transition={{ type: "spring", stiffness: 220, damping: 22 }}
-          className="fixed right-3 top-20 z-50 w-[calc(100%-1.5rem)] max-w-[15rem] rounded-xl bg-gradient-to-br from-liora-800 to-liora-950 p-3 text-white shadow-2xl ring-1 ring-white/10 sm:w-60"
+          className="fixed right-3 top-20 z-50 w-[calc(100%-1.5rem)] max-w-[18rem] rounded-xl bg-gradient-to-br from-liora-800 to-liora-950 p-3 text-white shadow-2xl ring-1 ring-white/10 sm:w-72"
         >
           <div className="flex items-start gap-2">
             <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gold-500 text-liora-950">
@@ -51,14 +51,6 @@ export default function GiftBadge() {
               <X size={12} />
             </button>
           </div>
-
-          <a
-            href="#gifts"
-            onClick={() => setVisible(false)}
-            className="mt-2 block w-full rounded-full bg-gold-500 py-1.5 text-center text-xs font-black text-liora-950 shadow"
-          >
-            شوفي الهدايا
-          </a>
         </motion.div>
       )}
     </AnimatePresence>
