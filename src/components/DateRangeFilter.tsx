@@ -1,6 +1,7 @@
 "use client";
 
 import { Calendar } from "lucide-react";
+import { toRiyadhDateString } from "@/lib/riyadhDate";
 
 export interface DateRange {
   from: string | null;
@@ -16,7 +17,7 @@ const presets = [
 ];
 
 function toDateInputValue(d: Date) {
-  return d.toISOString().slice(0, 10);
+  return toRiyadhDateString(d);
 }
 
 export default function DateRangeFilter({

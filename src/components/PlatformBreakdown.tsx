@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { DateRange } from "@/components/DateRangeFilter";
+import { riyadhRangeBounds } from "@/lib/riyadhDate";
 
 interface Row {
   platform: string;
@@ -39,14 +40,14 @@ export default function PlatformBreakdown({ dateRange }: { dateRange: DateRange 
       let visitsQuery = supabase.from("page_views").select("platform");
       let ordersQuery = supabase.from("orders").select("platform, price");
 
-      if (dateRange.from) {
-        visitsQuery = visitsQuery.gte("created_at", dateRange.from);
-        ordersQuery = ordersQuery.gte("created_at", dateRange.from);
+      const bounds = riyadhRangeBounds(dateRange);
+      if (bounds.gte) {
+        visitsQuery = visitsQuery.gte("created_at", bounds.gte);
+        ordersQuery = ordersQuery.gte("created_at", bounds.gte);
       }
-      if (dateRange.to) {
-        const toEnd = `${dateRange.to}T23:59:59.999`;
-        visitsQuery = visitsQuery.lte("created_at", toEnd);
-        ordersQuery = ordersQuery.lte("created_at", toEnd);
+      if (bounds.lte) {
+        visitsQuery = visitsQuery.lte("created_at", bounds.lte);
+        ordersQuery = ordersQuery.lte("created_at", bounds.lte);
       }
 
       const [{ data: visitsData, error: visitsError }, { data: ordersData, error: ordersError }] =

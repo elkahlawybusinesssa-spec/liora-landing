@@ -5,6 +5,7 @@ import { Eye, ShoppingBag, TrendingUp, Wallet, BadgeDollarSign } from "lucide-re
 import { supabase } from "@/lib/supabase";
 import { DateRange } from "@/components/DateRangeFilter";
 import { STATUS_OPTIONS } from "@/lib/orderStatus";
+import { riyadhRangeBounds } from "@/lib/riyadhDate";
 
 interface Stats {
   visits: number;
@@ -35,14 +36,14 @@ export default function AnalyticsSummary({
       .select("*", { count: "exact", head: true });
     let ordersQuery = supabase.from("orders").select("price, created_at, status");
 
-    if (range.from) {
-      visitsQuery = visitsQuery.gte("created_at", range.from);
-      ordersQuery = ordersQuery.gte("created_at", range.from);
+    const bounds = riyadhRangeBounds(range);
+    if (bounds.gte) {
+      visitsQuery = visitsQuery.gte("created_at", bounds.gte);
+      ordersQuery = ordersQuery.gte("created_at", bounds.gte);
     }
-    if (range.to) {
-      const toEnd = `${range.to}T23:59:59.999`;
-      visitsQuery = visitsQuery.lte("created_at", toEnd);
-      ordersQuery = ordersQuery.lte("created_at", toEnd);
+    if (bounds.lte) {
+      visitsQuery = visitsQuery.lte("created_at", bounds.lte);
+      ordersQuery = ordersQuery.lte("created_at", bounds.lte);
     }
     if (status !== "all") {
       ordersQuery = ordersQuery.eq("status", status);

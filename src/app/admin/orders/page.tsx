@@ -12,6 +12,7 @@ import LeadModal from "@/components/LeadModal";
 import DateRangeFilter, { DateRange } from "@/components/DateRangeFilter";
 import AnalyticsSummary from "@/components/AnalyticsSummary";
 import PlatformBreakdown from "@/components/PlatformBreakdown";
+import { toRiyadhDateString } from "@/lib/riyadhDate";
 
 interface Order {
   id: string;
@@ -133,7 +134,7 @@ export default function AdminOrdersPage() {
 
   const filteredOrders =
     orders?.filter((o) => {
-      const created = o.created_at.slice(0, 10);
+      const created = toRiyadhDateString(o.created_at);
       if (dateRange.from && created < dateRange.from) return false;
       if (dateRange.to && created > dateRange.to) return false;
       if (statusFilter !== "all" && o.status !== statusFilter) return false;
@@ -142,7 +143,7 @@ export default function AdminOrdersPage() {
 
   const filteredLeads =
     leads?.filter((l) => {
-      const created = l.created_at.slice(0, 10);
+      const created = toRiyadhDateString(l.created_at);
       if (dateRange.from && created < dateRange.from) return false;
       if (dateRange.to && created > dateRange.to) return false;
       return true;
