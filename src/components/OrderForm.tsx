@@ -263,7 +263,7 @@ export default function OrderForm() {
 
       <div>
         <label className="mb-2 block text-sm font-bold text-liora-900">
-          اختاري طريقة الشحن
+          مصاريف الشحن
         </label>
         <div className="space-y-2">
           {shippingOptions.map((option) => {
