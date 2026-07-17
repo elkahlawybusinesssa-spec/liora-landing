@@ -3,13 +3,14 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { MessageCircle, RefreshCw, LogOut, BarChart3, Plus, Trash2, Globe, Pencil, Settings, UserPlus } from "lucide-react";
+import { MessageCircle, RefreshCw, LogOut, Plus, Trash2, Globe, Pencil, Settings, UserPlus } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { toWhatsappLink } from "@/lib/phone";
 import { STATUS_OPTIONS } from "@/lib/orderStatus";
 import OrderModal from "@/components/OrderModal";
 import LeadModal from "@/components/LeadModal";
 import DateRangeFilter, { DateRange } from "@/components/DateRangeFilter";
+import AnalyticsSummary from "@/components/AnalyticsSummary";
 
 interface Order {
   id: string;
@@ -173,13 +174,6 @@ export default function AdminOrdersPage() {
               </button>
             )}
             <Link
-              href="/admin/analytics"
-              className="flex items-center gap-2 rounded-full bg-liora-800 px-4 py-2 text-sm font-bold text-white shadow"
-            >
-              <BarChart3 size={16} />
-              التحليلات
-            </Link>
-            <Link
               href="/admin/settings"
               className="flex items-center gap-2 rounded-full bg-liora-800 px-4 py-2 text-sm font-bold text-white shadow"
             >
@@ -203,7 +197,15 @@ export default function AdminOrdersPage() {
           </div>
         </div>
 
-        <div className="mt-4 flex gap-2 border-b border-liora-100">
+        <div className="mt-4">
+          <DateRangeFilter value={dateRange} onChange={setDateRange} />
+        </div>
+
+        <div className="mt-6 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-liora-100">
+          <AnalyticsSummary dateRange={dateRange} />
+        </div>
+
+        <div className="mt-6 flex gap-2 border-b border-liora-100">
           <button
             onClick={() => setTab("orders")}
             className={`px-4 py-2 text-sm font-bold transition ${
@@ -224,10 +226,6 @@ export default function AdminOrdersPage() {
           >
             الليدز المهتمة
           </button>
-        </div>
-
-        <div className="mt-4">
-          <DateRangeFilter value={dateRange} onChange={setDateRange} />
         </div>
 
         {error && (
