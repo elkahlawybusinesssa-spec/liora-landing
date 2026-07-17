@@ -12,8 +12,8 @@ export interface SiteSettings {
 export const DEFAULT_SETTINGS: SiteSettings = {
   original_price: 299,
   price_1: 159,
-  price_2: 294,
-  price_3: 404,
+  price_2: 299,
+  price_3: 399,
   shipping_delivery_label: "الشحن إلى باب المنزل",
   shipping_delivery_cost: 0,
 };
