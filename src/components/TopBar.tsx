@@ -1,10 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ShieldCheck, Truck, RotateCcw } from "lucide-react";
+import { Truck, RotateCcw } from "lucide-react";
 
 const items = [
-  { icon: ShieldCheck, text: "ضمان حق المعاينة قبل الدفع" },
   { icon: Truck, text: "توصيل سريع لكل مناطق المملكة" },
   { icon: RotateCcw, text: "استبدال مجاني خلال 14 يوم" },
 ];
