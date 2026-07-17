@@ -3,11 +3,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { MessageCircle, RefreshCw, LogOut, BarChart3, Plus, Trash2, Globe, Pencil, Settings } from "lucide-react";
+import { MessageCircle, RefreshCw, LogOut, BarChart3, Plus, Trash2, Globe, Pencil, Settings, UserPlus } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { toWhatsappLink } from "@/lib/phone";
 import { STATUS_OPTIONS } from "@/lib/orderStatus";
 import OrderModal from "@/components/OrderModal";
+import LeadModal from "@/components/LeadModal";
 import DateRangeFilter, { DateRange } from "@/components/DateRangeFilter";
 
 interface Order {
@@ -21,6 +22,15 @@ interface Order {
   notes: string | null;
   status: string;
   source: string | null;
+  created_at: string;
+}
+
+interface Lead {
+  id: string;
+  full_name: string;
+  phone: string;
+  notes: string | null;
+  source: string;
   created_at: string;
 }
 
@@ -40,11 +50,15 @@ function whatsappMessage(order: Order) {
 
 export default function AdminOrdersPage() {
   const router = useRouter();
+  const [tab, setTab] = useState<"orders" | "leads">("orders");
   const [orders, setOrders] = useState<Order[] | null>(null);
+  const [leads, setLeads] = useState<Lead[] | null>(null);
   const [error, setError] = useState("");
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
+  const [showAddLeadModal, setShowAddLeadModal] = useState(false);
+  const [editingLead, setEditingLead] = useState<Lead | null>(null);
   const [dateRange, setDateRange] = useState<DateRange>({ from: null, to: null });
 
   const loadOrders = useCallback(async () => {
@@ -60,6 +74,19 @@ export default function AdminOrdersPage() {
     setOrders(data as Order[]);
   }, []);
 
+  const loadLeads = useCallback(async () => {
+    setError("");
+    const { data, error: fetchError } = await supabase
+      .from("leads")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (fetchError) {
+      setError("تعذر تحميل الليدز");
+      return;
+    }
+    setLeads(data as Lead[]);
+  }, []);
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       if (!data.session) {
@@ -68,8 +95,9 @@ export default function AdminOrdersPage() {
       }
       setCheckingAuth(false);
       loadOrders();
+      loadLeads();
     });
-  }, [router, loadOrders]);
+  }, [router, loadOrders, loadLeads]);
 
   async function handleLogout() {
     await supabase.auth.signOut();
@@ -91,9 +119,25 @@ export default function AdminOrdersPage() {
     await supabase.from("orders").delete().eq("id", order.id);
   }
 
+  async function handleDeleteLead(lead: Lead) {
+    if (!confirm(`متأكدة إنك عايزة تحذفي ليد "${lead.full_name}"؟ الإجراء ده مش قابل للتراجع.`)) {
+      return;
+    }
+    setLeads((prev) => (prev ? prev.filter((l) => l.id !== lead.id) : prev));
+    await supabase.from("leads").delete().eq("id", lead.id);
+  }
+
   const filteredOrders =
     orders?.filter((o) => {
       const created = o.created_at.slice(0, 10);
+      if (dateRange.from && created < dateRange.from) return false;
+      if (dateRange.to && created > dateRange.to) return false;
+      return true;
+    }) ?? null;
+
+  const filteredLeads =
+    leads?.filter((l) => {
+      const created = l.created_at.slice(0, 10);
       if (dateRange.from && created < dateRange.from) return false;
       if (dateRange.to && created > dateRange.to) return false;
       return true;
@@ -106,16 +150,28 @@ export default function AdminOrdersPage() {
       <div className="mx-auto max-w-5xl">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-black text-liora-900">
-            طلبات العملاء {filteredOrders ? `(${filteredOrders.length})` : ""}
+            {tab === "orders"
+              ? `طلبات العملاء ${filteredOrders ? `(${filteredOrders.length})` : ""}`
+              : `الليدز المهتمة ${filteredLeads ? `(${filteredLeads.length})` : ""}`}
           </h1>
           <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => setShowAddModal(true)}
-              className="flex items-center gap-2 rounded-full bg-gold-500 px-4 py-2 text-sm font-bold text-liora-950 shadow"
-            >
-              <Plus size={16} />
-              إضافة طلب
-            </button>
+            {tab === "orders" ? (
+              <button
+                onClick={() => setShowAddModal(true)}
+                className="flex items-center gap-2 rounded-full bg-gold-500 px-4 py-2 text-sm font-bold text-liora-950 shadow"
+              >
+                <Plus size={16} />
+                إضافة طلب
+              </button>
+            ) : (
+              <button
+                onClick={() => setShowAddLeadModal(true)}
+                className="flex items-center gap-2 rounded-full bg-gold-500 px-4 py-2 text-sm font-bold text-liora-950 shadow"
+              >
+                <UserPlus size={16} />
+                إضافة ليد
+              </button>
+            )}
             <Link
               href="/admin/analytics"
               className="flex items-center gap-2 rounded-full bg-liora-800 px-4 py-2 text-sm font-bold text-white shadow"
@@ -131,7 +187,7 @@ export default function AdminOrdersPage() {
               الأسعار والشحن
             </Link>
             <button
-              onClick={loadOrders}
+              onClick={() => (tab === "orders" ? loadOrders() : loadLeads())}
               className="flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-bold text-liora-800 shadow ring-1 ring-liora-100"
             >
               <RefreshCw size={16} />
@@ -147,6 +203,29 @@ export default function AdminOrdersPage() {
           </div>
         </div>
 
+        <div className="mt-4 flex gap-2 border-b border-liora-100">
+          <button
+            onClick={() => setTab("orders")}
+            className={`px-4 py-2 text-sm font-bold transition ${
+              tab === "orders"
+                ? "border-b-2 border-liora-800 text-liora-900"
+                : "text-liora-500 hover:text-liora-800"
+            }`}
+          >
+            الطلبات
+          </button>
+          <button
+            onClick={() => setTab("leads")}
+            className={`px-4 py-2 text-sm font-bold transition ${
+              tab === "leads"
+                ? "border-b-2 border-liora-800 text-liora-900"
+                : "text-liora-500 hover:text-liora-800"
+            }`}
+          >
+            الليدز المهتمة
+          </button>
+        </div>
+
         <div className="mt-4">
           <DateRangeFilter value={dateRange} onChange={setDateRange} />
         </div>
@@ -157,7 +236,8 @@ export default function AdminOrdersPage() {
           </p>
         )}
 
-        {!filteredOrders ? (
+        {tab === "orders" ? (
+        !filteredOrders ? (
           <p className="mt-8 text-center text-liora-700">جارِ التحميل...</p>
         ) : filteredOrders.length === 0 ? (
           <p className="mt-8 text-center text-liora-700">لا توجد طلبات في الفترة دي</p>
@@ -248,6 +328,76 @@ export default function AdminOrdersPage() {
               </div>
             ))}
           </div>
+        )
+        ) : !filteredLeads ? (
+          <p className="mt-8 text-center text-liora-700">جارِ التحميل...</p>
+        ) : filteredLeads.length === 0 ? (
+          <p className="mt-8 text-center text-liora-700">لا يوجد ليدز في الفترة دي</p>
+        ) : (
+          <div className="mt-6 space-y-3">
+            {filteredLeads.map((lead) => (
+              <div
+                key={lead.id}
+                className="flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-liora-100 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div>
+                  <p className="font-bold text-liora-900">{lead.full_name}</p>
+                  <p className="text-sm text-liora-700" dir="ltr">
+                    {lead.phone}
+                  </p>
+                  {lead.notes && (
+                    <p className="mt-1 text-xs text-liora-500">
+                      ملاحظات: {lead.notes}
+                    </p>
+                  )}
+                  <p className="mt-1 text-xs text-liora-400" dir="ltr">
+                    {formatDate(lead.created_at)}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {lead.source === "website" ? (
+                    <span className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-2.5 text-xs font-bold text-blue-700 ring-1 ring-blue-200">
+                      <Globe size={14} />
+                      موقع
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1.5 rounded-full bg-green-50 px-3 py-2.5 text-xs font-bold text-green-700 ring-1 ring-green-200">
+                      <MessageCircle size={14} />
+                      واتساب
+                    </span>
+                  )}
+
+                  <a
+                    href={toWhatsappLink(
+                      lead.phone,
+                      `مرحباً ${lead.full_name} 👋\n\nحابين نتابع معك بخصوص اهتمامك بمجموعة Liora التعليمية، تحبي نساعدك بأي استفسار؟`
+                    )}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 rounded-full bg-green-500 px-5 py-2.5 font-bold text-white shadow transition hover:scale-105"
+                  >
+                    <MessageCircle size={18} />
+                    واتساب
+                  </a>
+
+                  <button
+                    onClick={() => setEditingLead(lead)}
+                    className="flex items-center justify-center gap-2 rounded-full bg-white px-4 py-2.5 font-bold text-liora-800 shadow ring-1 ring-liora-100 transition hover:scale-105 hover:bg-liora-50"
+                  >
+                    <Pencil size={18} />
+                  </button>
+
+                  <button
+                    onClick={() => handleDeleteLead(lead)}
+                    className="flex items-center justify-center gap-2 rounded-full bg-white px-4 py-2.5 font-bold text-red-600 shadow ring-1 ring-red-200 transition hover:scale-105 hover:bg-red-50"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         )}
       </div>
 
@@ -263,6 +413,21 @@ export default function AdminOrdersPage() {
           order={editingOrder}
           onClose={() => setEditingOrder(null)}
           onSaved={loadOrders}
+        />
+      )}
+
+      {showAddLeadModal && (
+        <LeadModal
+          onClose={() => setShowAddLeadModal(false)}
+          onSaved={loadLeads}
+        />
+      )}
+
+      {editingLead && (
+        <LeadModal
+          lead={editingLead}
+          onClose={() => setEditingLead(null)}
+          onSaved={loadLeads}
         />
       )}
     </main>
