@@ -11,6 +11,7 @@ import OrderModal from "@/components/OrderModal";
 import LeadModal from "@/components/LeadModal";
 import DateRangeFilter, { DateRange } from "@/components/DateRangeFilter";
 import AnalyticsSummary from "@/components/AnalyticsSummary";
+import PlatformBreakdown from "@/components/PlatformBreakdown";
 
 interface Order {
   id: string;
@@ -203,6 +204,10 @@ export default function AdminOrdersPage() {
 
         <div className="mt-6 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-liora-100">
           <AnalyticsSummary dateRange={dateRange} />
+        </div>
+
+        <div className="mt-6 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-liora-100">
+          <PlatformBreakdown dateRange={dateRange} />
         </div>
 
         <div className="mt-6 flex gap-2 border-b border-liora-100">

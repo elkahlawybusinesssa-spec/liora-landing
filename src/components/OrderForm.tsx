@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Loader2, Check } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { fetchSiteSettings, DEFAULT_SETTINGS, SiteSettings } from "@/lib/settings";
+import { getStoredPlatform } from "@/lib/platform";
 
 const cities = [
   "الرياض",
@@ -114,6 +115,7 @@ export default function OrderForm() {
       shipping_method: shippingMethod,
       shipping_cost: shippingCost,
       source: "website",
+      platform: getStoredPlatform(),
     });
     setLoading(false);
 
