@@ -16,6 +16,14 @@ interface EditableOrder {
   status: string;
   source: string | null;
   notes: string | null;
+  created_at?: string;
+}
+
+function toLocalInputValue(iso?: string) {
+  const d = iso ? new Date(iso) : new Date();
+  const offset = d.getTimezoneOffset();
+  const local = new Date(d.getTime() - offset * 60000);
+  return local.toISOString().slice(0, 16);
 }
 
 export default function OrderModal({
@@ -59,6 +67,7 @@ export default function OrderModal({
     const status = String(data.get("status") || "new");
     const source = String(data.get("source") || "whatsapp");
     const notes = String(data.get("notes") || "").trim();
+    const createdAtLocal = String(data.get("created_at") || "");
 
     if (!full_name || !phone) {
       setError("الاسم ورقم الجوال مطلوبين");
@@ -75,6 +84,7 @@ export default function OrderModal({
       status,
       source,
       notes: notes || null,
+      ...(createdAtLocal && { created_at: new Date(createdAtLocal).toISOString() }),
     };
 
     setSaving(true);
@@ -210,6 +220,19 @@ export default function OrderModal({
                 <option key={s} value={s} />
               ))}
             </datalist>
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-bold text-liora-900">
+              تاريخ الطلب
+            </label>
+            <input
+              name="created_at"
+              type="datetime-local"
+              dir="ltr"
+              defaultValue={toLocalInputValue(order?.created_at)}
+              className="w-full rounded-xl border border-liora-100 px-3 py-2 outline-none focus:border-liora-500"
+            />
           </div>
 
           <div>
