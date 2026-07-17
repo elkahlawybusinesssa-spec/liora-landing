@@ -14,10 +14,17 @@ interface Stats {
   totalSales: number;
 }
 
-export default function AnalyticsSummary({ dateRange }: { dateRange: DateRange }) {
+export default function AnalyticsSummary({
+  dateRange,
+  statusFilter,
+  onStatusFilterChange,
+}: {
+  dateRange: DateRange;
+  statusFilter: string;
+  onStatusFilterChange: (status: string) => void;
+}) {
   const [stats, setStats] = useState<Stats | null>(null);
   const [error, setError] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
 
   const loadStats = useCallback(async (range: DateRange, status: string) => {
     setError("");
@@ -97,7 +104,7 @@ export default function AnalyticsSummary({ dateRange }: { dateRange: DateRange }
 
         <div className="flex flex-wrap gap-1.5">
           <button
-            onClick={() => setStatusFilter("all")}
+            onClick={() => onStatusFilterChange("all")}
             className={`rounded-full px-3 py-1.5 text-xs font-bold transition ${
               statusFilter === "all"
                 ? "bg-liora-800 text-white"
@@ -109,7 +116,7 @@ export default function AnalyticsSummary({ dateRange }: { dateRange: DateRange }
           {STATUS_OPTIONS.map((s) => (
             <button
               key={s.value}
-              onClick={() => setStatusFilter(s.value)}
+              onClick={() => onStatusFilterChange(s.value)}
               className={`rounded-full px-3 py-1.5 text-xs font-bold transition ${
                 statusFilter === s.value
                   ? "bg-liora-800 text-white"

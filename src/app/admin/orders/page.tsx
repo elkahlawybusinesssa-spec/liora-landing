@@ -62,6 +62,7 @@ export default function AdminOrdersPage() {
   const [showAddLeadModal, setShowAddLeadModal] = useState(false);
   const [editingLead, setEditingLead] = useState<Lead | null>(null);
   const [dateRange, setDateRange] = useState<DateRange>({ from: null, to: null });
+  const [statusFilter, setStatusFilter] = useState("all");
 
   const loadOrders = useCallback(async () => {
     setError("");
@@ -134,6 +135,7 @@ export default function AdminOrdersPage() {
       const created = o.created_at.slice(0, 10);
       if (dateRange.from && created < dateRange.from) return false;
       if (dateRange.to && created > dateRange.to) return false;
+      if (statusFilter !== "all" && o.status !== statusFilter) return false;
       return true;
     }) ?? null;
 
@@ -203,7 +205,11 @@ export default function AdminOrdersPage() {
         </div>
 
         <div className="mt-6 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-liora-100">
-          <AnalyticsSummary dateRange={dateRange} />
+          <AnalyticsSummary
+            dateRange={dateRange}
+            statusFilter={statusFilter}
+            onStatusFilterChange={setStatusFilter}
+          />
         </div>
 
         <div className="mt-6 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-liora-100">
