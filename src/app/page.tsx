@@ -16,14 +16,12 @@ import Footer from "@/components/Footer";
 import VisitTracker from "@/components/VisitTracker";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
 import ContentProtection from "@/components/ContentProtection";
-import GiftBadge from "@/components/GiftBadge";
 
 export default function Home() {
   return (
     <main className="protected-page">
       <ContentProtection />
       <VisitTracker />
-      <GiftBadge />
       <TopBar />
       <Navbar />
       <PromoBanner />
