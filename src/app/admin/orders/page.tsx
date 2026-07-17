@@ -21,6 +21,7 @@ interface Order {
   address: string;
   product: string | null;
   price: number | null;
+  quantity: number | null;
   notes: string | null;
   status: string;
   source: string | null;
@@ -268,6 +269,7 @@ export default function AdminOrdersPage() {
                   {order.product && (
                     <p className="mt-1 text-xs text-liora-500">
                       المنتج: {order.product}
+                      {order.quantity != null ? ` (${order.quantity} مجموعة)` : ""}
                       {order.price != null ? ` — ${order.price} ريال` : ""}
                     </p>
                   )}

@@ -4,6 +4,7 @@ import { useEffect, useState, FormEvent } from "react";
 import { X } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { STATUS_OPTIONS } from "@/lib/orderStatus";
+import { fetchSiteSettings, DEFAULT_SETTINGS, SiteSettings } from "@/lib/settings";
 
 interface EditableOrder {
   id: string;
@@ -11,6 +12,7 @@ interface EditableOrder {
   phone: string;
   product: string | null;
   price: number | null;
+  quantity?: number | null;
   city: string;
   address: string;
   status: string;
@@ -38,6 +40,9 @@ export default function OrderModal({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [sources, setSources] = useState<string[]>(["واتساب", "الموقع"]);
+  const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SETTINGS);
+  const [quantity, setQuantity] = useState(order?.quantity ?? 1);
+  const [price, setPrice] = useState(order?.price ?? DEFAULT_SETTINGS.price_1);
   const isEdit = !!order;
 
   useEffect(() => {
@@ -53,6 +58,25 @@ export default function OrderModal({
       });
   }, []);
 
+  useEffect(() => {
+    fetchSiteSettings().then((s) => {
+      setSettings(s);
+      if (!isEdit) setPrice(s.price_1);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const quantityOptions = [
+    { qty: 1, price: settings.price_1, label: "مجموعة واحدة" },
+    { qty: 2, price: settings.price_2, label: "مجموعتين" },
+    { qty: 3, price: settings.price_3, label: "3 مجموعات" },
+  ];
+
+  function handleQuantitySelect(qty: number, tierPrice: number) {
+    setQuantity(qty);
+    setPrice(tierPrice);
+  }
+
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
@@ -61,7 +85,6 @@ export default function OrderModal({
     const full_name = String(data.get("full_name") || "").trim();
     const phone = String(data.get("phone") || "").trim();
     const product = String(data.get("product") || "").trim();
-    const price = Number(data.get("price") || 0);
     const city = String(data.get("city") || "").trim();
     const address = String(data.get("address") || "").trim();
     const status = String(data.get("status") || "new");
@@ -79,6 +102,7 @@ export default function OrderModal({
       phone,
       product,
       price,
+      quantity,
       city,
       address,
       status,
@@ -165,12 +189,38 @@ export default function OrderModal({
 
           <div>
             <label className="mb-1 block text-sm font-bold text-liora-900">
+              عدد المجموعات
+            </label>
+            <div className="grid grid-cols-3 gap-2">
+              {quantityOptions.map((opt) => (
+                <button
+                  key={opt.qty}
+                  type="button"
+                  onClick={() => handleQuantitySelect(opt.qty, opt.price)}
+                  className={`rounded-xl border px-2 py-2 text-center text-sm font-bold transition ${
+                    quantity === opt.qty
+                      ? "border-liora-500 bg-liora-50 text-liora-900 ring-2 ring-liora-200"
+                      : "border-liora-100 text-liora-700"
+                  }`}
+                >
+                  {opt.label}
+                  <span className="mt-0.5 block text-xs font-black text-liora-800">
+                    {opt.price} ريال
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-bold text-liora-900">
               السعر (ريال)
             </label>
             <input
               name="price"
               type="number"
-              defaultValue={order?.price ?? 179}
+              value={price}
+              onChange={(e) => setPrice(Number(e.target.value))}
               dir="ltr"
               className="w-full rounded-xl border border-liora-100 px-3 py-2 outline-none focus:border-liora-500"
             />
