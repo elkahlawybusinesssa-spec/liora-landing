@@ -6,7 +6,7 @@
       "runtimeExecutable": "/bin/bash",
       "runtimeArgs": [
         "-c",
-        "export PATH=/Users/mahmoudadel/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin:$PATH && cd /Users/mahmoudadel/Documents/liora-landing && node /Users/mahmoudadel/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/.pnpm/pnpm@11.7.0/node_modules/pnpm/bin/pnpm.cjs dev"
+        "export PATH=/Users/mahmoudadel/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin:$PATH && cd /Users/mahmoudadel/Documents/liora-landing && node /Users/mahmoudadel/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/.pnpm/pnpm@11.9.0/node_modules/pnpm/bin/pnpm.cjs dev"
       ],
       "port": 3000
     }
