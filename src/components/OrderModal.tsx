@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useEffect, useState, FormEvent } from "react";
 import { X } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { STATUS_OPTIONS } from "@/lib/orderStatus";
@@ -29,7 +29,21 @@ export default function OrderModal({
 }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [sources, setSources] = useState<string[]>(["واتساب", "الموقع"]);
   const isEdit = !!order;
+
+  useEffect(() => {
+    supabase
+      .from("orders")
+      .select("source")
+      .then(({ data }) => {
+        if (!data) return;
+        const custom = data
+          .map((row) => row.source)
+          .filter((s): s is string => !!s && s !== "whatsapp" && s !== "website");
+        setSources((prev) => Array.from(new Set([...prev, ...custom])));
+      });
+  }, []);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -178,14 +192,24 @@ export default function OrderModal({
             <label className="mb-1 block text-sm font-bold text-liora-900">
               مصدر العميل
             </label>
-            <select
+            <input
               name="source"
-              defaultValue={order?.source ?? "whatsapp"}
+              list="source-options"
+              defaultValue={
+                order?.source === "whatsapp"
+                  ? "واتساب"
+                  : order?.source === "website"
+                  ? "الموقع"
+                  : order?.source ?? "واتساب"
+              }
+              placeholder="اكتبي مصدر جديد أو اختاري من القائمة"
               className="w-full rounded-xl border border-liora-100 px-3 py-2 outline-none focus:border-liora-500"
-            >
-              <option value="whatsapp">واتساب</option>
-              <option value="website">الموقع</option>
-            </select>
+            />
+            <datalist id="source-options">
+              {sources.map((s) => (
+                <option key={s} value={s} />
+              ))}
+            </datalist>
           </div>
 
           <div>

@@ -273,15 +273,19 @@ export default function AdminOrdersPage() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  {order.source === "website" ? (
+                  {order.source === "website" || order.source === "الموقع" ? (
                     <span className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-2.5 text-xs font-bold text-blue-700 ring-1 ring-blue-200">
                       <Globe size={14} />
                       موقع
                     </span>
-                  ) : (
+                  ) : order.source === "whatsapp" || order.source === "واتساب" ? (
                     <span className="flex items-center gap-1.5 rounded-full bg-green-50 px-3 py-2.5 text-xs font-bold text-green-700 ring-1 ring-green-200">
                       <MessageCircle size={14} />
                       واتساب
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1.5 rounded-full bg-liora-50 px-3 py-2.5 text-xs font-bold text-liora-700 ring-1 ring-liora-100">
+                      {order.source}
                     </span>
                   )}
 
