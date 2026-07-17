@@ -5,8 +5,10 @@ import { supabase } from "@/lib/supabase";
 
 export default function VisitTracker() {
   useEffect(() => {
-    if (sessionStorage.getItem("liora_visit_logged")) return;
-    sessionStorage.setItem("liora_visit_logged", "1");
+    const today = new Date().toISOString().slice(0, 10);
+    const key = `liora_visit_logged_${today}`;
+    if (localStorage.getItem(key)) return;
+    localStorage.setItem(key, "1");
     supabase.from("page_views").insert({ path: window.location.pathname }).then();
   }, []);
 
