@@ -42,7 +42,7 @@ export default function FinalCTA() {
           </p>
 
           <ul className="mt-5 space-y-2 text-sm">
-            {["الدفع عند الاستلام", "معاينة قبل الدفع", "توصيل خلال 2-4 أيام"].map(
+            {["الدفع عند الاستلام", "معاينة قبل الدفع", "توصيل خلال 2-4 أيام", "شحن مجاني"].map(
               (t) => (
                 <li key={t} className="flex items-center justify-center gap-2 md:justify-start">
                   <Check size={16} className="text-gold-400" />

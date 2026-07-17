@@ -1,7 +1,8 @@
-import { ShieldCheck, Banknote } from "lucide-react";
+import { ShieldCheck, Banknote, Truck } from "lucide-react";
 
 const items = [
   { icon: ShieldCheck, text: "ضمان حق المعاينة قبل الدفع" },
+  { icon: Truck, text: "شحن مجاني" },
   { icon: Banknote, text: "الدفع عند الاستلام" },
 ];
 

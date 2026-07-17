@@ -11,11 +11,11 @@ export interface SiteSettings {
 
 export const DEFAULT_SETTINGS: SiteSettings = {
   original_price: 299,
-  price_1: 179,
-  price_2: 310,
-  price_3: 450,
+  price_1: 159,
+  price_2: 294,
+  price_3: 404,
   shipping_delivery_label: "الشحن إلى باب المنزل",
-  shipping_delivery_cost: 20,
+  shipping_delivery_cost: 0,
 };
 
 export async function fetchSiteSettings(): Promise<SiteSettings> {
