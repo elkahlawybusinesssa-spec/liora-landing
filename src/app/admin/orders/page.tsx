@@ -13,6 +13,7 @@ import DateRangeFilter, { DateRange } from "@/components/DateRangeFilter";
 import AnalyticsSummary from "@/components/AnalyticsSummary";
 import PlatformBreakdown from "@/components/PlatformBreakdown";
 import { toRiyadhDateString } from "@/lib/riyadhDate";
+import { labelForPlatform } from "@/lib/platformLabels";
 
 interface Order {
   id: string;
@@ -26,6 +27,7 @@ interface Order {
   notes: string | null;
   status: string;
   source: string | null;
+  platform: string | null;
   created_at: string;
 }
 
@@ -281,6 +283,7 @@ export default function AdminOrdersPage() {
                   )}
                   <p className="mt-1 text-xs text-liora-400" dir="ltr">
                     {formatDate(order.created_at)}
+                    <span dir="rtl"> — المصدر: {labelForPlatform(order.platform)}</span>
                   </p>
                 </div>
 

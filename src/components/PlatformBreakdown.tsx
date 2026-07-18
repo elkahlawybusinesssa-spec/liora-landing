@@ -4,26 +4,13 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { DateRange } from "@/components/DateRangeFilter";
 import { riyadhRangeBounds } from "@/lib/riyadhDate";
+import { labelForPlatform, normalizePlatform } from "@/lib/platformLabels";
 
 interface Row {
   platform: string;
   visits: number;
   orders: number;
   sales: number;
-}
-
-const LABELS: Record<string, string> = {
-  facebook: "فيسبوك",
-  instagram: "انستقرام",
-  tiktok: "تيك توك",
-  snapchat: "سناب شات",
-  google: "جوجل",
-  whatsapp: "واتساب",
-  direct: "مباشر / غير معروف",
-};
-
-function labelFor(platform: string) {
-  return LABELS[platform] ?? platform;
 }
 
 export default function PlatformBreakdown({ dateRange }: { dateRange: DateRange }) {
@@ -61,17 +48,17 @@ export default function PlatformBreakdown({ dateRange }: { dateRange: DateRange 
       }
 
       const map = new Map<string, Row>();
-      const get = (platform: string) => {
-        const key = platform || "direct";
+      const get = (platform: string | null) => {
+        const key = normalizePlatform(platform);
         if (!map.has(key)) map.set(key, { platform: key, visits: 0, orders: 0, sales: 0 });
         return map.get(key)!;
       };
 
       (visitsData ?? []).forEach((v) => {
-        get(v.platform || "direct").visits += 1;
+        get(v.platform).visits += 1;
       });
       (ordersData ?? []).forEach((o) => {
-        const row = get(o.platform || "direct");
+        const row = get(o.platform);
         row.orders += 1;
         row.sales += Number(o.price ?? 0);
       });
@@ -114,7 +101,7 @@ export default function PlatformBreakdown({ dateRange }: { dateRange: DateRange 
             <tbody>
               {rows.map((r) => (
                 <tr key={r.platform} className="border-b border-liora-50">
-                  <td className="py-2 font-bold text-liora-900">{labelFor(r.platform)}</td>
+                  <td className="py-2 font-bold text-liora-900">{labelForPlatform(r.platform)}</td>
                   <td className="py-2 text-liora-700">{r.visits.toLocaleString("ar-SA")}</td>
                   <td className="py-2 text-liora-700">{r.orders.toLocaleString("ar-SA")}</td>
                   <td className="py-2 text-liora-700">
