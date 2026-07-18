@@ -83,7 +83,7 @@ export default function ThankYouContent({
         className="mt-8 flex flex-col items-center gap-3 sm:flex-row"
       >
         <a
-          href="https://wa.me/966501712904"
+          href="https://wa.me/966544468047"
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-2 rounded-full bg-green-500 px-6 py-3 font-bold text-white shadow-lg transition hover:scale-105"

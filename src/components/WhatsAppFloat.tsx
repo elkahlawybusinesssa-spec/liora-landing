@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 
-const WHATSAPP_NUMBER = "966501712904";
+const WHATSAPP_NUMBER = "966544468047";
 const MESSAGE = "مرحباً، عندي سؤال عن مجموعة Liora التعليمية";
 const ICON_URL =
   "https://ghckapztoiimrmxtadpx.supabase.co/storage/v1/object/public/catalog/catalog/icons/whatsapp.png";
