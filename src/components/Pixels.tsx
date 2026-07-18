@@ -1,12 +1,22 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Script from "next/script";
+import { isProdSite } from "@/lib/env";
 
 const META_PIXEL_ID = "1324774812866279";
 const TIKTOK_PIXEL_ID = "D7SGM6RC77U0A0BNBJK0";
 const SNAP_PIXEL_ID = "fe921d30-69f2-4e2e-8975-d624fd6fc1e9";
 
 export default function Pixels() {
+  const [enabled, setEnabled] = useState(false);
+
+  useEffect(() => {
+    setEnabled(isProdSite());
+  }, []);
+
+  if (!enabled) return null;
+
   return (
     <>
       <Script id="meta-pixel" strategy="afterInteractive">

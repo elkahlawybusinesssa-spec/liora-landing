@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { CheckCircle2, MessageCircle, Home } from "lucide-react";
 import { trackOrderConversion } from "@/lib/pixels";
+import { isProdSite } from "@/lib/env";
 
 const sparkles = Array.from({ length: 10 });
 
@@ -22,8 +23,15 @@ export default function ThankYouContent({
   useEffect(() => {
     if (!trackConversion || fired.current) return;
     fired.current = true;
+
+    // Guard against firing again on a page refresh / revisit of the same order's /shokran link.
+    const key = `liora_conv_fired_${name}_${value ?? ""}`;
+    if (typeof window !== "undefined" && sessionStorage.getItem(key)) return;
+    if (typeof window !== "undefined") sessionStorage.setItem(key, "1");
+
+    if (!isProdSite()) return;
     trackOrderConversion(value);
-  }, [trackConversion, value]);
+  }, [trackConversion, value, name]);
 
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-liora-950 via-liora-800 to-liora-700 px-5 py-16 text-center text-white">
