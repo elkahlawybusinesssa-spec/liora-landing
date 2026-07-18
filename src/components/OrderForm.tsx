@@ -9,7 +9,7 @@ import { fetchSiteSettings, DEFAULT_SETTINGS, SiteSettings } from "@/lib/setting
 import { getStoredPlatform } from "@/lib/platform";
 
 // Temporarily hidden per request — re-enable by flipping this back to true.
-const SHOW_QUANTITY_SELECTOR = false;
+const SHOW_QUANTITY_SELECTOR = true;
 
 const cities = [
   "الرياض",
