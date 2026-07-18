@@ -6,7 +6,7 @@ import Link from "next/link";
 import { MessageCircle, RefreshCw, LogOut, Plus, Trash2, Globe, Pencil, Settings, UserPlus } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { toWhatsappLink } from "@/lib/phone";
-import { STATUS_OPTIONS } from "@/lib/orderStatus";
+import { STATUS_OPTIONS, STATUS_COLOR_CLASSES } from "@/lib/orderStatus";
 import OrderModal from "@/components/OrderModal";
 import LeadModal from "@/components/LeadModal";
 import DateRangeFilter, { DateRange } from "@/components/DateRangeFilter";
@@ -305,9 +305,8 @@ export default function AdminOrdersPage() {
                     value={order.status}
                     onChange={(e) => handleStatusChange(order.id, e.target.value)}
                     className={`rounded-full border px-3 py-2.5 text-sm font-bold shadow outline-none transition ${
-                      order.status === "delivered"
-                        ? "border-green-300 bg-green-500 text-white focus:border-green-500"
-                        : "border-liora-100 bg-white text-liora-800 focus:border-liora-500"
+                      STATUS_COLOR_CLASSES[order.status]?.select ??
+                      "border-liora-100 bg-white text-liora-800 focus:border-liora-500"
                     }`}
                   >
                     {STATUS_OPTIONS.map((s) => (

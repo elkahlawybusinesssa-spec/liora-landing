@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Eye, ShoppingBag, TrendingUp, Wallet, BadgeDollarSign } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { DateRange } from "@/components/DateRangeFilter";
-import { STATUS_OPTIONS } from "@/lib/orderStatus";
+import { STATUS_OPTIONS, STATUS_COLOR_CLASSES } from "@/lib/orderStatus";
 import { riyadhRangeBounds } from "@/lib/riyadhDate";
 
 interface Stats {
@@ -120,8 +120,8 @@ export default function AnalyticsSummary({
               onClick={() => onStatusFilterChange(s.value)}
               className={`rounded-full px-3 py-1.5 text-xs font-bold transition ${
                 statusFilter === s.value
-                  ? "bg-liora-800 text-white"
-                  : "bg-liora-50 text-liora-700 hover:bg-liora-100"
+                  ? STATUS_COLOR_CLASSES[s.value].active
+                  : STATUS_COLOR_CLASSES[s.value].inactive
               }`}
             >
               {s.label}
