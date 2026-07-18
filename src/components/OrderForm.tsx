@@ -8,6 +8,9 @@ import { supabase } from "@/lib/supabase";
 import { fetchSiteSettings, DEFAULT_SETTINGS, SiteSettings } from "@/lib/settings";
 import { getStoredPlatform } from "@/lib/platform";
 
+// Temporarily hidden per request — re-enable by flipping this back to true.
+const SHOW_QUANTITY_SELECTOR = false;
+
 const cities = [
   "الرياض",
   "جدة",
@@ -216,6 +219,7 @@ export default function OrderForm() {
         />
       </div>
 
+      {SHOW_QUANTITY_SELECTOR && (
       <div>
         <label className="mb-2 block text-sm font-bold text-liora-900">
           كام مجموعة تحبي تطلبي؟
@@ -262,6 +266,7 @@ export default function OrderForm() {
           })}
         </div>
       </div>
+      )}
 
       <div>
         <label className="mb-2 block text-sm font-bold text-liora-900">
