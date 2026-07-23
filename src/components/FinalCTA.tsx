@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Check } from "lucide-react";
 import OrderForm from "./OrderForm";
 import { trackInitiateCheckout } from "@/lib/pixels";
 import { fetchSiteSettings, DEFAULT_SETTINGS, SiteSettings } from "@/lib/settings";
@@ -45,20 +44,23 @@ export default function FinalCTA({
             <span className="text-4xl font-black text-gold-400">{settings.price_1} ريال</span>
             <span className="text-2xl font-bold text-gold-400 line-through decoration-white decoration-1">بدلاً من {settings.original_price} ريال</span>
           </div>
-          <p className="mt-1 text-sm text-liora-200">
-            + 8 هدايا مجانية لفترة محدودة
-          </p>
 
-          <ul className="mt-5 space-y-2 text-sm">
-            {["الدفع عند الاستلام", "معاينة قبل الدفع", "توصيل خلال 2-4 أيام", "شحن مجاني"].map(
-              (t) => (
-                <li key={t} className="flex items-center justify-center gap-2 md:justify-start">
-                  <Check size={16} className="text-gold-400" />
-                  {t}
-                </li>
-              )
-            )}
-          </ul>
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm font-black text-gold-400 md:justify-start md:text-base">
+            <span>5 كتب تعليمية</span>
+            <span>5 أقلام هدية</span>
+            <span>8 هدايا إضافية</span>
+          </div>
+
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-3 md:justify-start">
+            {["شحن مجاني", "دفع بعد الاستلام"].map((item) => (
+              <span
+                key={item}
+                className="rounded-xl border border-gold-400/80 bg-gold-400/10 px-5 py-2.5 text-sm font-black text-gold-400 shadow-[0_0_18px_rgba(240,201,94,0.12)]"
+              >
+                {item}
+              </span>
+            ))}
+          </div>
 
           <motion.a
             href={`#${formId}`}
