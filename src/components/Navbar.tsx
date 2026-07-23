@@ -30,7 +30,7 @@ export default function Navbar() {
           <span className="text-gold-500/70">•</span>
           <span>الشحن مجاني</span>
           <span className="text-gold-500/70">•</span>
-          <span>الدفع عند الاستلام</span>
+          <span>الدفع بعد الاستلام</span>
         </div>
       </div>
     </motion.header>
