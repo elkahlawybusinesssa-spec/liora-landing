@@ -27,12 +27,13 @@ export default function Home() {
       <SocialProofSection />
       <ProductCatalog />
       <BonusSection />
+      <FinalCTA />
       <FeaturesGrid />
       <Gallery />
       <Testimonials />
       <GuaranteeStrip />
       <FAQ />
-      <FinalCTA />
+      <FinalCTA sectionId="final-order" formId="final-order-form" />
       <StickyMobileCTA />
       <WhatsAppFloat />
       <Footer />

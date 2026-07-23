@@ -7,7 +7,15 @@ import OrderForm from "./OrderForm";
 import { trackInitiateCheckout } from "@/lib/pixels";
 import { fetchSiteSettings, DEFAULT_SETTINGS, SiteSettings } from "@/lib/settings";
 
-export default function FinalCTA() {
+type FinalCTAProps = {
+  sectionId?: string;
+  formId?: string;
+};
+
+export default function FinalCTA({
+  sectionId = "order",
+  formId = "order-form",
+}: FinalCTAProps) {
   const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SETTINGS);
 
   useEffect(() => {
@@ -16,7 +24,7 @@ export default function FinalCTA() {
 
   return (
     <section
-      id="order"
+      id={sectionId}
       className="relative overflow-hidden bg-gradient-to-b from-liora-800 to-liora-950 py-16 text-white"
     >
       <div className="mx-auto grid max-w-5xl grid-cols-1 items-center gap-8 px-5 md:grid-cols-2">
@@ -53,7 +61,7 @@ export default function FinalCTA() {
           </ul>
 
           <motion.a
-            href="#order-form"
+            href={`#${formId}`}
             onClick={() => trackInitiateCheckout()}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -70,7 +78,7 @@ export default function FinalCTA() {
           </motion.a>
         </motion.div>
 
-        <div id="order-form">
+        <div id={formId}>
           <OrderForm />
         </div>
       </div>
