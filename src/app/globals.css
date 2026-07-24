@@ -175,3 +175,16 @@ main[dir="rtl"] .grid.items-end > div:first-child button svg {
     width: 100%;
   }
 }
+
+/* Orders-only users see only the operational order cards. */
+.orders-only-access main[dir="rtl"] > div > div:nth-child(1),
+.orders-only-access main[dir="rtl"] > div > div:nth-child(2),
+.orders-only-access main[dir="rtl"] > div > div:nth-child(3),
+.orders-only-access main[dir="rtl"] > div > div:nth-child(4),
+.orders-only-access main[dir="rtl"] > div > div:nth-child(5) {
+  display: none !important;
+}
+
+.orders-only-access main[dir="rtl"] {
+  padding-top: 20px;
+}
