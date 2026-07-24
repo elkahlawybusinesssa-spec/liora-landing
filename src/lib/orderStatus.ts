@@ -4,7 +4,7 @@ export const STATUS_OPTIONS = [
   { value: "confirmed", label: "تم التأكيد", color: "amber" },
   { value: "delivered", label: "تم التسليم", color: "green" },
   { value: "interested_whatsapp", label: "عميل مهتم واتساب", color: "teal" },
-] as const;
+];
 
 export const STATUS_COLOR_CLASSES: Record<string, { active: string; inactive: string; select: string }> = {
   new: {
