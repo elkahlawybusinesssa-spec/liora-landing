@@ -1,0 +1,70 @@
+name: Fix shipment not delivered status
+
+on:
+  push:
+    paths:
+      - .github/workflows/fix-shipment-not-delivered.yml
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Fix workflow status mapping
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('src/app/admin/orders/page.tsx')
+          text = path.read_text()
+
+          old_mapping = '''  if (order.status === "لم يتم التحصيل") return "not_collected";
+  if (order.status === "delivered" || order.shipping_company_status === "تم التسليم") return "shipment_delivered";
+  if (order.waybill_status === "تم الاصدار" && order.shipping_company_status === "لم يتم التسليم") {
+    return order.status === "confirmed" ? "confirmed_waybill" : "shipment_not_delivered";
+  }'''
+
+          new_mapping = '''  if (order.status === "لم يتم التحصيل") return "not_collected";
+  if (order.status === "shipment_not_delivered") return "shipment_not_delivered";
+  if (order.status === "delivered" || order.shipping_company_status === "تم التسليم") return "shipment_delivered";
+  if (order.waybill_status === "تم الاصدار" && order.shipping_company_status === "لم يتم التسليم") {
+    return "confirmed_waybill";
+  }'''
+
+          old_update = '''    } else if (value === "shipment_not_delivered") {
+      Object.assign(updates, {
+        status: "confirmed",
+        waybill_status: "تم الاصدار",
+        shipping_company_status: "لم يتم التسليم",
+      });'''
+
+          new_update = '''    } else if (value === "shipment_not_delivered") {
+      Object.assign(updates, {
+        status: "shipment_not_delivered",
+        waybill_status: "تم الاصدار",
+        shipping_company_status: "لم يتم التسليم",
+      });'''
+
+          if old_mapping not in text:
+              raise SystemExit('workflowStatus mapping not found')
+          if old_update not in text:
+              raise SystemExit('shipment update branch not found')
+
+          text = text.replace(old_mapping, new_mapping, 1)
+          text = text.replace(old_update, new_update, 1)
+          path.write_text(text)
+          PY
+
+      - name: Commit fix
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/app/admin/orders/page.tsx
+          git commit -m "Fix shipment not delivered selection"
+          git push origin main
