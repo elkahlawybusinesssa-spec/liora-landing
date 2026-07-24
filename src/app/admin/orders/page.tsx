@@ -36,6 +36,7 @@ interface Order {
   quantity: number | null;
   notes: string | null;
   status: string;
+  shipping_company_status?: "تم التسليم" | "لم يتم التسليم";
   collection_status: "تم التحصيل" | "لم يتم التحصيل";
   source: string | null;
   platform: string | null;
@@ -133,6 +134,41 @@ export default function AdminOrdersPage() {
     await supabase.from("orders").update({ status }).eq("id", orderId);
   }
 
+  async function handleShippingCompanyStatusChange(
+    orderId: string,
+    shippingCompanyStatus: NonNullable<Order["shipping_company_status"]>
+  ) {
+    const previousStatus = orders?.find((order) => order.id === orderId)?.shipping_company_status;
+
+    setOrders((prev) =>
+      prev
+        ? prev.map((order) =>
+            order.id === orderId
+              ? { ...order, shipping_company_status: shippingCompanyStatus }
+              : order
+          )
+        : prev
+    );
+
+    const { error: updateError } = await supabase
+      .from("orders")
+      .update({ shipping_company_status: shippingCompanyStatus })
+      .eq("id", orderId);
+
+    if (updateError) {
+      setError("تعذر حفظ حالة تسليم شركة الشحن");
+      setOrders((prev) =>
+        prev
+          ? prev.map((order) =>
+              order.id === orderId
+                ? { ...order, shipping_company_status: previousStatus ?? "لم يتم التسليم" }
+                : order
+            )
+          : prev
+      );
+    }
+  }
+
   async function handleCollectionStatusChange(
     orderId: string,
     collectionStatus: Order["collection_status"]
@@ -202,8 +238,8 @@ export default function AdminOrdersPage() {
   if (checkingAuth) return null;
 
   return (
-    <main className="min-h-screen bg-liora-50 px-3 py-8 sm:px-4 lg:px-6" dir="rtl">
-      <div className="mx-auto max-w-7xl">
+    <main className="min-h-screen bg-liora-50 px-2 py-8 sm:px-3 lg:px-4" dir="rtl">
+      <div className="mx-auto w-full max-w-[1600px]">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-black text-liora-900">
             {tab === "orders"
@@ -267,8 +303,8 @@ export default function AdminOrdersPage() {
           ) : (
             <div className="mt-6 space-y-3">
               {filteredOrders.map((order) => (
-                <div key={order.id} className="flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-liora-100 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
+                <div key={order.id} className="flex flex-col gap-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-liora-100 xl:flex-row xl:items-center xl:justify-between">
+                  <div className="min-w-[310px] xl:max-w-[38%]">
                     <p className="font-bold text-liora-900">{order.full_name}</p>
                     <p className="text-sm text-liora-700" dir="ltr">{order.phone}</p>
                     <p className="text-sm text-liora-600">{order.city} — {order.address}</p>
@@ -286,7 +322,32 @@ export default function AdminOrdersPage() {
                     </p>
                   </div>
 
-                  <div className="flex flex-wrap items-end gap-2">
+                  <div className="flex flex-1 flex-wrap items-end justify-start gap-2 xl:justify-end">
+                    <label className="flex flex-col gap-1">
+                      <span className="px-1 text-xs font-bold text-liora-700">حالة التوصيل</span>
+                      <select value={order.status} onChange={(event) => handleStatusChange(order.id, event.target.value)} className={`rounded-full border px-3 py-2.5 text-sm font-bold shadow outline-none transition ${STATUS_COLOR_CLASSES[order.status]?.select ?? "border-liora-100 bg-white text-liora-800 focus:border-liora-500"}`}>
+                        {STATUS_OPTIONS.map((status) => (
+                          <option key={status.value} value={status.value}>{status.label}</option>
+                        ))}
+                      </select>
+                    </label>
+
+                    <label className="flex flex-col gap-1">
+                      <span className="px-1 text-xs font-bold text-liora-700">شركة الشحن سلمت الطلب؟</span>
+                      <select
+                        value={order.shipping_company_status ?? "لم يتم التسليم"}
+                        onChange={(event) => handleShippingCompanyStatusChange(order.id, event.target.value as NonNullable<Order["shipping_company_status"]>)}
+                        className={`rounded-full border px-3 py-2.5 text-sm font-bold shadow outline-none transition ${
+                          order.shipping_company_status === "تم التسليم"
+                            ? "border-green-200 bg-green-50 text-green-700"
+                            : "border-amber-200 bg-amber-50 text-amber-700"
+                        }`}
+                      >
+                        <option value="لم يتم التسليم">لم يتم التسليم</option>
+                        <option value="تم التسليم">تم التسليم</option>
+                      </select>
+                    </label>
+
                     {order.source === "website" || order.source === "الموقع" ? (
                       <span className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-2.5 text-xs font-bold text-blue-700 ring-1 ring-blue-200">
                         <Globe size={14} /> موقع
@@ -298,12 +359,6 @@ export default function AdminOrdersPage() {
                     ) : (
                       <span className="flex items-center gap-1.5 rounded-full bg-liora-50 px-3 py-2.5 text-xs font-bold text-liora-700 ring-1 ring-liora-100">{order.source}</span>
                     )}
-
-                    <select value={order.status} onChange={(event) => handleStatusChange(order.id, event.target.value)} className={`rounded-full border px-3 py-2.5 text-sm font-bold shadow outline-none transition ${STATUS_COLOR_CLASSES[order.status]?.select ?? "border-liora-100 bg-white text-liora-800 focus:border-liora-500"}`}>
-                      {STATUS_OPTIONS.map((status) => (
-                        <option key={status.value} value={status.value}>{status.label}</option>
-                      ))}
-                    </select>
 
                     <label className="flex flex-col gap-1">
                       <span className="px-1 text-xs font-bold text-liora-700">حالة التحصيل</span>
@@ -321,9 +376,12 @@ export default function AdminOrdersPage() {
                       </select>
                     </label>
 
-                    <a href={toWhatsappLink(order.phone, whatsappMessage(order))} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 rounded-full bg-green-500 px-5 py-2.5 font-bold text-white shadow transition hover:scale-105">
-                      <MessageCircle size={18} /> واتساب
-                    </a>
+                    <label className="flex flex-col gap-1">
+                      <span className="px-1 text-xs font-bold text-liora-700">التواصل واتساب</span>
+                      <a href={toWhatsappLink(order.phone, whatsappMessage(order))} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 rounded-full bg-green-500 px-5 py-2.5 font-bold text-white shadow transition hover:scale-105">
+                        <MessageCircle size={18} /> واتساب
+                      </a>
+                    </label>
 
                     <button onClick={() => setEditingOrder(order)} className="flex items-center justify-center rounded-full bg-white px-4 py-2.5 font-bold text-liora-800 shadow ring-1 ring-liora-100 transition hover:scale-105 hover:bg-liora-50">
                       <Pencil size={18} />
