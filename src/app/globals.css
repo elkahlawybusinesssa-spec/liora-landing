@@ -53,3 +53,12 @@ body {
 .protected-page img.draggable-media {
   pointer-events: auto;
 }
+
+/* Admin orders: keep the operational workflow in the exact visual order requested. */
+main[dir="rtl"] .grid.items-end {
+  direction: ltr;
+}
+
+main[dir="rtl"] .grid.items-end > * {
+  direction: rtl;
+}
