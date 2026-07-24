@@ -202,8 +202,8 @@ export default function AdminOrdersPage() {
   if (checkingAuth) return null;
 
   return (
-    <main className="min-h-screen bg-liora-50 px-4 py-8" dir="rtl">
-      <div className="mx-auto max-w-5xl">
+    <main className="min-h-screen bg-liora-50 px-3 py-8 sm:px-4 lg:px-6" dir="rtl">
+      <div className="mx-auto max-w-7xl">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-black text-liora-900">
             {tab === "orders"
