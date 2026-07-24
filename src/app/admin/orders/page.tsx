@@ -119,14 +119,12 @@ export default function AdminOrdersPage() {
 
   async function saveNationalAddress(order: Order) {
     const value = (nationalAddressDrafts[order.id] ?? order.national_address ?? "").trim();
-    const saved = await updateOrderField(order.id, "national_address", value, "تعذر حفظ العنوان الوطني");
-    if (saved) setEditingNationalAddressId(null);
+    if (await updateOrderField(order.id, "national_address", value, "تعذر حفظ العنوان الوطني")) setEditingNationalAddressId(null);
   }
 
   async function saveWaybillNumber(order: Order) {
     const value = (waybillDrafts[order.id] ?? order.waybill_number ?? "").trim();
-    const saved = await updateOrderField(order.id, "waybill_number", value, "تعذر حفظ رقم البوليصة");
-    if (saved) setEditingWaybillId(null);
+    if (await updateOrderField(order.id, "waybill_number", value, "تعذر حفظ رقم البوليصة")) setEditingWaybillId(null);
   }
 
   async function handleDelete(order: Order) {
@@ -210,7 +208,19 @@ export default function AdminOrdersPage() {
                       <p className="mt-1 text-xs text-liora-400" dir="ltr">{formatDate(order.created_at)}<span dir="rtl"> — المصدر: {labelForPlatform(order.platform)}</span></p>
                     </div>
 
-                    <div className="grid items-end gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-9">
+                    <div className="grid items-end gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-[minmax(180px,1.15fr)_repeat(5,minmax(145px,1fr))_minmax(150px,0.9fr)_minmax(130px,0.8fr)]">
+                      <div className="flex min-w-0 flex-col gap-1">
+                        <span className={labelClass}>العنوان الوطني</span>
+                        {editingNational ? (
+                          <div className="flex gap-1">
+                            <input value={nationalAddressDrafts[order.id] ?? order.national_address ?? ""} onChange={(e) => setNationalAddressDrafts((prev) => ({ ...prev, [order.id]: e.target.value }))} placeholder="اكتب العنوان الوطني" className="min-w-0 flex-1 rounded-xl border border-liora-100 px-2 py-2.5 text-xs outline-none" />
+                            <button onClick={() => saveNationalAddress(order)} className="rounded-xl bg-liora-800 px-2 text-xs font-bold text-white">حفظ</button>
+                          </div>
+                        ) : (
+                          <div className="flex min-h-[42px] items-center justify-between gap-1 rounded-xl bg-liora-50 px-2 text-xs"><span className="truncate">{order.national_address}</span><button onClick={() => { setNationalAddressDrafts((prev) => ({ ...prev, [order.id]: order.national_address ?? "" })); setEditingNationalAddressId(order.id); }} className="font-bold text-liora-800">تعديل</button></div>
+                        )}
+                      </div>
+
                       <label className="flex min-w-0 flex-col gap-1">
                         <span className={labelClass}>حالة الطلب</span>
                         <select value={order.status} onChange={(event) => updateOrderField(order.id, "status", event.target.value, "تعذر حفظ حالة الطلب")} className={`${selectBase} ${STATUS_COLOR_CLASSES[order.status]?.select ?? "border-liora-100 bg-white text-liora-800"}`}>
@@ -259,26 +269,15 @@ export default function AdminOrdersPage() {
                         </span>
                       </div>
 
-                      <div className="flex min-w-0 flex-col gap-1">
-                        <span className={labelClass}>العنوان الوطني</span>
-                        {editingNational ? (
-                          <div className="flex gap-1">
-                            <input value={nationalAddressDrafts[order.id] ?? order.national_address ?? ""} onChange={(e) => setNationalAddressDrafts((prev) => ({ ...prev, [order.id]: e.target.value }))} placeholder="اكتب العنوان الوطني" className="min-w-0 flex-1 rounded-xl border border-liora-100 px-2 py-2.5 text-xs outline-none" />
-                            <button onClick={() => saveNationalAddress(order)} className="rounded-xl bg-liora-800 px-2 text-xs font-bold text-white">حفظ</button>
-                          </div>
-                        ) : (
-                          <div className="flex min-h-[42px] items-center justify-between gap-1 rounded-xl bg-liora-50 px-2 text-xs"><span className="truncate">{order.national_address}</span><button onClick={() => { setNationalAddressDrafts((prev) => ({ ...prev, [order.id]: order.national_address ?? "" })); setEditingNationalAddressId(order.id); }} className="font-bold text-liora-800">تعديل</button></div>
-                        )}
-                      </div>
-
-                      <div className="flex min-w-0 flex-col gap-1">
-                        <span className={labelClass}>التواصل مع الشحن</span>
-                        <a href={`https://wa.me/?text=${encodeURIComponent(shippingWhatsappMessage(order))}`} target="_blank" rel="noopener noreferrer" className="flex min-h-[42px] items-center justify-center gap-2 rounded-xl bg-emerald-600 px-3 py-2.5 text-sm font-bold text-white shadow"><MessageCircle size={17} /> واتساب</a>
-                      </div>
-
-                      <div className="flex min-w-0 flex-col gap-1">
-                        <span className={labelClass}>التواصل مع العميل</span>
-                        <a href={toWhatsappLink(order.phone, customerWhatsappMessage(order))} target="_blank" rel="noopener noreferrer" className="flex min-h-[42px] items-center justify-center gap-2 rounded-xl bg-green-500 px-3 py-2.5 text-sm font-bold text-white shadow"><MessageCircle size={17} /> واتساب</a>
+                      <div className="flex min-w-0 flex-col gap-2">
+                        <div className="flex flex-col gap-1">
+                          <span className={labelClass}>التواصل مع العميل</span>
+                          <a href={toWhatsappLink(order.phone, customerWhatsappMessage(order))} target="_blank" rel="noopener noreferrer" className="flex min-h-[42px] items-center justify-center gap-2 rounded-xl bg-green-500 px-3 py-2.5 text-sm font-bold text-white shadow"><MessageCircle size={17} /> واتساب</a>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <span className={labelClass}>التواصل مع الشحن</span>
+                          <a href={`https://wa.me/?text=${encodeURIComponent(shippingWhatsappMessage(order))}`} target="_blank" rel="noopener noreferrer" className="flex min-h-[42px] items-center justify-center gap-2 rounded-xl bg-emerald-600 px-3 py-2.5 text-sm font-bold text-white shadow"><MessageCircle size={17} /> واتساب</a>
+                        </div>
                       </div>
 
                       <div className="flex flex-col gap-2">
