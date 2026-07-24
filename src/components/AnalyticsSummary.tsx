@@ -80,21 +80,9 @@ export default function AnalyticsSummary({
     ? [
         { icon: Eye, label: "عدد الزيارات", value: stats.visits.toLocaleString("ar-SA") },
         { icon: ShoppingBag, label: "عدد الطلبات", value: stats.orders.toLocaleString("ar-SA") },
-        {
-          icon: Wallet,
-          label: "متوسط سعر الطلب",
-          value: `${stats.avgOrderValue.toLocaleString("ar-SA")} ريال`,
-        },
-        {
-          icon: TrendingUp,
-          label: "معدل التحويل",
-          value: `${stats.conversionRate.toFixed(1)}%`,
-        },
-        {
-          icon: BadgeDollarSign,
-          label: "إجمالي المبيعات",
-          value: `${stats.totalSales.toLocaleString("ar-SA")} ريال`,
-        },
+        { icon: Wallet, label: "متوسط سعر الطلب", value: `${stats.avgOrderValue.toLocaleString("ar-SA")} ريال` },
+        { icon: TrendingUp, label: "معدل التحويل", value: `${stats.conversionRate.toFixed(1)}%` },
+        { icon: BadgeDollarSign, label: "إجمالي المبيعات", value: `${stats.totalSales.toLocaleString("ar-SA")} ريال` },
       ]
     : [];
 
@@ -116,7 +104,7 @@ export default function AnalyticsSummary({
           </button>
           {STATUS_OPTIONS.map((s) => (
             <button
-              key={s.value}
+              key={`${s.value}-${s.label}`}
               onClick={() => onStatusFilterChange(s.value)}
               className={`rounded-full px-3 py-1.5 text-xs font-bold transition ${
                 statusFilter === s.value
@@ -131,9 +119,7 @@ export default function AnalyticsSummary({
       </div>
 
       {error && (
-        <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600">
-          {error}
-        </p>
+        <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600">{error}</p>
       )}
 
       {!stats ? (
@@ -141,10 +127,7 @@ export default function AnalyticsSummary({
       ) : (
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {cards.map((c) => (
-            <div
-              key={c.label}
-              className="flex items-center gap-4 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-liora-100"
-            >
+            <div key={c.label} className="flex items-center gap-4 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-liora-100">
               <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-liora-800 text-gold-400">
                 <c.icon size={22} />
               </div>
