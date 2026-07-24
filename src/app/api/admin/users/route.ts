@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://ghckapztoiimrmxtadpx.supabase.co";
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdoY2thcHp0b2lpbXJteHRhZHB4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2OTQwODEsImV4cCI6MjA5OTI3MDA4MX0.Jttuz2Uo1iciqBfarJYBH0ZwuAwyFww3ki-aS94kcwI";
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 type AdminRole = "full_access" | "orders_only";
@@ -13,7 +13,7 @@ function normalizeUsername(value: string) {
 
 export async function POST(request: Request) {
   try {
-    if (!SERVICE_ROLE_KEY || !SUPABASE_ANON_KEY) {
+    if (!SERVICE_ROLE_KEY) {
       return NextResponse.json({ error: "SERVER_NOT_CONFIGURED" }, { status: 500 });
     }
 
@@ -38,12 +38,7 @@ export async function POST(request: Request) {
       auth: { autoRefreshToken: false, persistSession: false },
     });
 
-    const { data: permission } = await admin
-      .from("admin_permissions")
-      .select("role")
-      .eq("user_id", sessionData.user.id)
-      .maybeSingle();
-
+    const { data: permission } = await admin.from("admin_permissions").select("role").eq("user_id", sessionData.user.id).maybeSingle();
     if (permission?.role !== "full_access") {
       return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
     }
@@ -53,23 +48,12 @@ export async function POST(request: Request) {
     const password = String(body.password || "");
     const role = body.role as AdminRole;
 
-    if (!/^[a-z0-9._-]{3,30}$/.test(username)) {
-      return NextResponse.json({ error: "INVALID_USERNAME" }, { status: 400 });
-    }
-    if (password.length < 6) {
-      return NextResponse.json({ error: "WEAK_PASSWORD" }, { status: 400 });
-    }
-    if (role !== "full_access" && role !== "orders_only") {
-      return NextResponse.json({ error: "INVALID_ROLE" }, { status: 400 });
-    }
+    if (!/^[a-z0-9._-]{3,30}$/.test(username)) return NextResponse.json({ error: "INVALID_USERNAME" }, { status: 400 });
+    if (password.length < 6) return NextResponse.json({ error: "WEAK_PASSWORD" }, { status: 400 });
+    if (role !== "full_access" && role !== "orders_only") return NextResponse.json({ error: "INVALID_ROLE" }, { status: 400 });
 
     const email = `${username}@liora.local`;
-    const { data: created, error: createError } = await admin.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-      user_metadata: { username },
-    });
+    const { data: created, error: createError } = await admin.auth.admin.createUser({ email, password, email_confirm: true, user_metadata: { username } });
 
     if (createError || !created.user) {
       const duplicate = createError?.message?.toLowerCase().includes("already");
