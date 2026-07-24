@@ -47,7 +47,11 @@ interface Lead {
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleString("en-GB", {
-    year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 }
 
@@ -80,20 +84,29 @@ export default function AdminOrdersPage() {
   const loadOrders = useCallback(async () => {
     setError("");
     const { data, error: fetchError } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
-    if (fetchError) { setError("تعذر تحميل الطلبات"); return; }
+    if (fetchError) {
+      setError("تعذر تحميل الطلبات");
+      return;
+    }
     setOrders(data as Order[]);
   }, []);
 
   const loadLeads = useCallback(async () => {
     setError("");
     const { data, error: fetchError } = await supabase.from("leads").select("*").order("created_at", { ascending: false });
-    if (fetchError) { setError("تعذر تحميل الليدز"); return; }
+    if (fetchError) {
+      setError("تعذر تحميل الليدز");
+      return;
+    }
     setLeads(data as Lead[]);
   }, []);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (!data.session) { router.replace("/admin"); return; }
+      if (!data.session) {
+        router.replace("/admin");
+        return;
+      }
       setCheckingAuth(false);
       loadOrders();
       loadLeads();
@@ -119,12 +132,16 @@ export default function AdminOrdersPage() {
 
   async function saveNationalAddress(order: Order) {
     const value = (nationalAddressDrafts[order.id] ?? order.national_address ?? "").trim();
-    if (await updateOrderField(order.id, "national_address", value, "تعذر حفظ العنوان الوطني")) setEditingNationalAddressId(null);
+    if (await updateOrderField(order.id, "national_address", value, "تعذر حفظ العنوان الوطني")) {
+      setEditingNationalAddressId(null);
+    }
   }
 
   async function saveWaybillNumber(order: Order) {
     const value = (waybillDrafts[order.id] ?? order.waybill_number ?? "").trim();
-    if (await updateOrderField(order.id, "waybill_number", value, "تعذر حفظ رقم البوليصة")) setEditingWaybillId(null);
+    if (await updateOrderField(order.id, "waybill_number", value, "تعذر حفظ رقم البوليصة")) {
+      setEditingWaybillId(null);
+    }
   }
 
   async function handleDelete(order: Order) {
@@ -196,6 +213,7 @@ export default function AdminOrdersPage() {
             {filteredOrders.map((order) => {
               const editingNational = editingNationalAddressId === order.id || !order.national_address;
               const editingWaybill = editingWaybillId === order.id || !order.waybill_number;
+
               return (
                 <div key={order.id} className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-liora-100">
                   <div className="grid gap-5 2xl:grid-cols-[minmax(320px,0.9fr)_minmax(0,3.1fr)]">
@@ -208,68 +226,13 @@ export default function AdminOrdersPage() {
                       <p className="mt-1 text-xs text-liora-400" dir="ltr">{formatDate(order.created_at)}<span dir="rtl"> — المصدر: {labelForPlatform(order.platform)}</span></p>
                     </div>
 
-                    <div className="grid items-end gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-[minmax(180px,1.15fr)_repeat(5,minmax(145px,1fr))_minmax(150px,0.9fr)_minmax(130px,0.8fr)]">
-                      <div className="flex min-w-0 flex-col gap-1">
-                        <span className={labelClass}>العنوان الوطني</span>
-                        {editingNational ? (
-                          <div className="flex gap-1">
-                            <input value={nationalAddressDrafts[order.id] ?? order.national_address ?? ""} onChange={(e) => setNationalAddressDrafts((prev) => ({ ...prev, [order.id]: e.target.value }))} placeholder="اكتب العنوان الوطني" className="min-w-0 flex-1 rounded-xl border border-liora-100 px-2 py-2.5 text-xs outline-none" />
-                            <button onClick={() => saveNationalAddress(order)} className="rounded-xl bg-liora-800 px-2 text-xs font-bold text-white">حفظ</button>
-                          </div>
-                        ) : (
-                          <div className="flex min-h-[42px] items-center justify-between gap-1 rounded-xl bg-liora-50 px-2 text-xs"><span className="truncate">{order.national_address}</span><button onClick={() => { setNationalAddressDrafts((prev) => ({ ...prev, [order.id]: order.national_address ?? "" })); setEditingNationalAddressId(order.id); }} className="font-bold text-liora-800">تعديل</button></div>
-                        )}
+                    <div dir="ltr" className="grid items-end gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-[minmax(130px,0.8fr)_minmax(150px,0.9fr)_minmax(180px,1.15fr)_repeat(5,minmax(145px,1fr))]">
+                      <div dir="rtl" className="flex flex-col gap-2">
+                        <button onClick={() => setEditingOrder(order)} className="flex min-h-[42px] items-center justify-center gap-2 rounded-xl bg-white px-3 py-2.5 font-bold text-liora-800 shadow ring-1 ring-liora-100"><Pencil size={18} /> تعديل</button>
+                        <button onClick={() => handleDelete(order)} className="flex min-h-[42px] items-center justify-center gap-2 rounded-xl bg-white px-3 py-2.5 font-bold text-red-600 shadow ring-1 ring-red-200"><Trash2 size={18} /> إلغاء الطلب</button>
                       </div>
 
-                      <label className="flex min-w-0 flex-col gap-1">
-                        <span className={labelClass}>حالة الطلب</span>
-                        <select value={order.status} onChange={(event) => updateOrderField(order.id, "status", event.target.value, "تعذر حفظ حالة الطلب")} className={`${selectBase} ${STATUS_COLOR_CLASSES[order.status]?.select ?? "border-liora-100 bg-white text-liora-800"}`}>
-                          {STATUS_OPTIONS.map((status) => <option key={status.value} value={status.value}>{status.label}</option>)}
-                        </select>
-                      </label>
-
-                      <div className="flex min-w-0 flex-col gap-1">
-                        <span className={labelClass}>البوليصة</span>
-                        <select value={order.waybill_status ?? "لم يتم الاصدار"} onChange={(event) => updateOrderField(order.id, "waybill_status", event.target.value as Order["waybill_status"], "تعذر حفظ حالة البوليصة")} className={`${selectBase} ${(order.waybill_status ?? "لم يتم الاصدار") === "تم الاصدار" ? "border-green-200 bg-green-50 text-green-700" : "border-amber-200 bg-amber-50 text-amber-700"}`}>
-                          <option value="لم يتم الاصدار">لم يتم الاصدار</option>
-                          <option value="تم الاصدار">تم الاصدار</option>
-                        </select>
-                        {(order.waybill_status ?? "لم يتم الاصدار") === "تم الاصدار" && (
-                          editingWaybill ? (
-                            <div className="mt-1 flex gap-1">
-                              <input value={waybillDrafts[order.id] ?? order.waybill_number ?? ""} onChange={(e) => setWaybillDrafts((prev) => ({ ...prev, [order.id]: e.target.value }))} placeholder="رقم البوليصة" className="min-w-0 flex-1 rounded-lg border border-liora-100 px-2 py-2 text-xs outline-none" />
-                              <button onClick={() => saveWaybillNumber(order)} className="rounded-lg bg-liora-800 px-2 text-xs font-bold text-white">حفظ</button>
-                            </div>
-                          ) : (
-                            <div className="mt-1 flex items-center justify-between gap-1 rounded-lg bg-liora-50 px-2 py-1.5 text-xs"><span className="truncate">{order.waybill_number}</span><button onClick={() => { setWaybillDrafts((prev) => ({ ...prev, [order.id]: order.waybill_number ?? "" })); setEditingWaybillId(order.id); }} className="font-bold text-liora-800">تعديل</button></div>
-                          )
-                        )}
-                      </div>
-
-                      <label className="flex min-w-0 flex-col gap-1">
-                        <span className={labelClass}>شركة الشحن سلمت الطلب؟</span>
-                        <select value={order.shipping_company_status ?? "لم يتم التسليم"} onChange={(event) => updateOrderField(order.id, "shipping_company_status", event.target.value as Order["shipping_company_status"], "تعذر حفظ حالة تسليم شركة الشحن")} className={`${selectBase} ${(order.shipping_company_status ?? "لم يتم التسليم") === "تم التسليم" ? "border-green-200 bg-green-50 text-green-700" : "border-amber-200 bg-amber-50 text-amber-700"}`}>
-                          <option value="لم يتم التسليم">لم يتم التسليم</option>
-                          <option value="تم التسليم">تم التسليم</option>
-                        </select>
-                      </label>
-
-                      <label className="flex min-w-0 flex-col gap-1">
-                        <span className={labelClass}>حالة التحصيل</span>
-                        <select value={order.collection_status ?? "لم يتم التحصيل"} onChange={(event) => updateOrderField(order.id, "collection_status", event.target.value as Order["collection_status"], "تعذر حفظ حالة التحصيل")} className={`${selectBase} ${(order.collection_status ?? "لم يتم التحصيل") === "تم التحصيل" ? "border-green-200 bg-green-50 text-green-700" : "border-amber-200 bg-amber-50 text-amber-700"}`}>
-                          <option value="لم يتم التحصيل">لم يتم التحصيل</option>
-                          <option value="تم التحصيل">تم التحصيل</option>
-                        </select>
-                      </label>
-
-                      <div className="flex min-w-0 flex-col gap-1">
-                        <span className={labelClass}>مصدر العميل</span>
-                        <span className="flex min-h-[42px] items-center justify-center gap-1.5 rounded-xl bg-blue-50 px-3 py-2.5 text-xs font-bold text-blue-700 ring-1 ring-blue-200">
-                          {order.source === "website" || order.source === "الموقع" ? <Globe size={14} /> : <MessageCircle size={14} />}{order.source === "website" || order.source === "الموقع" ? "موقع" : order.source || "غير محدد"}
-                        </span>
-                      </div>
-
-                      <div className="flex min-w-0 flex-col gap-2">
+                      <div dir="rtl" className="flex min-w-0 flex-col gap-2">
                         <div className="flex flex-col gap-1">
                           <span className={labelClass}>التواصل مع العميل</span>
                           <a href={toWhatsappLink(order.phone, customerWhatsappMessage(order))} target="_blank" rel="noopener noreferrer" className="flex min-h-[42px] items-center justify-center gap-2 rounded-xl bg-green-500 px-3 py-2.5 text-sm font-bold text-white shadow"><MessageCircle size={17} /> واتساب</a>
@@ -280,9 +243,65 @@ export default function AdminOrdersPage() {
                         </div>
                       </div>
 
-                      <div className="flex flex-col gap-2">
-                        <button onClick={() => setEditingOrder(order)} className="flex min-h-[42px] items-center justify-center gap-2 rounded-xl bg-white px-3 py-2.5 font-bold text-liora-800 shadow ring-1 ring-liora-100"><Pencil size={18} /> تعديل</button>
-                        <button onClick={() => handleDelete(order)} className="flex min-h-[42px] items-center justify-center gap-2 rounded-xl bg-white px-3 py-2.5 font-bold text-red-600 shadow ring-1 ring-red-200"><Trash2 size={18} /> إلغاء الطلب</button>
+                      <div dir="rtl" className="flex min-w-0 flex-col gap-1">
+                        <span className={labelClass}>العنوان الوطني</span>
+                        {editingNational ? (
+                          <div className="flex gap-1">
+                            <input value={nationalAddressDrafts[order.id] ?? order.national_address ?? ""} onChange={(event) => setNationalAddressDrafts((prev) => ({ ...prev, [order.id]: event.target.value }))} placeholder="اكتب العنوان الوطني" className="min-w-0 flex-1 rounded-xl border border-liora-100 px-2 py-2.5 text-xs outline-none" />
+                            <button onClick={() => saveNationalAddress(order)} className="rounded-xl bg-liora-800 px-2 text-xs font-bold text-white">حفظ</button>
+                          </div>
+                        ) : (
+                          <div className="flex min-h-[42px] items-center justify-between gap-1 rounded-xl bg-liora-50 px-2 text-xs"><span className="truncate">{order.national_address}</span><button onClick={() => { setNationalAddressDrafts((prev) => ({ ...prev, [order.id]: order.national_address ?? "" })); setEditingNationalAddressId(order.id); }} className="font-bold text-liora-800">تعديل</button></div>
+                        )}
+                      </div>
+
+                      <label dir="rtl" className="flex min-w-0 flex-col gap-1">
+                        <span className={labelClass}>حالة الطلب</span>
+                        <select value={order.status} onChange={(event) => updateOrderField(order.id, "status", event.target.value, "تعذر حفظ حالة الطلب")} className={`${selectBase} ${STATUS_COLOR_CLASSES[order.status]?.select ?? "border-liora-100 bg-white text-liora-800"}`}>
+                          {STATUS_OPTIONS.map((status) => <option key={status.value} value={status.value}>{status.label}</option>)}
+                        </select>
+                      </label>
+
+                      <div dir="rtl" className="flex min-w-0 flex-col gap-1">
+                        <span className={labelClass}>البوليصة</span>
+                        <select value={order.waybill_status ?? "لم يتم الاصدار"} onChange={(event) => updateOrderField(order.id, "waybill_status", event.target.value as Order["waybill_status"], "تعذر حفظ حالة البوليصة")} className={`${selectBase} ${(order.waybill_status ?? "لم يتم الاصدار") === "تم الاصدار" ? "border-green-200 bg-green-50 text-green-700" : "border-amber-200 bg-amber-50 text-amber-700"}`}>
+                          <option value="لم يتم الاصدار">لم يتم الاصدار</option>
+                          <option value="تم الاصدار">تم الاصدار</option>
+                        </select>
+                        {(order.waybill_status ?? "لم يتم الاصدار") === "تم الاصدار" && (
+                          editingWaybill ? (
+                            <div className="mt-1 flex gap-1">
+                              <input value={waybillDrafts[order.id] ?? order.waybill_number ?? ""} onChange={(event) => setWaybillDrafts((prev) => ({ ...prev, [order.id]: event.target.value }))} placeholder="رقم البوليصة" className="min-w-0 flex-1 rounded-lg border border-liora-100 px-2 py-2 text-xs outline-none" />
+                              <button onClick={() => saveWaybillNumber(order)} className="rounded-lg bg-liora-800 px-2 text-xs font-bold text-white">حفظ</button>
+                            </div>
+                          ) : (
+                            <div className="mt-1 flex items-center justify-between gap-1 rounded-lg bg-liora-50 px-2 py-1.5 text-xs"><span className="truncate">{order.waybill_number}</span><button onClick={() => { setWaybillDrafts((prev) => ({ ...prev, [order.id]: order.waybill_number ?? "" })); setEditingWaybillId(order.id); }} className="font-bold text-liora-800">تعديل</button></div>
+                          )
+                        )}
+                      </div>
+
+                      <label dir="rtl" className="flex min-w-0 flex-col gap-1">
+                        <span className={labelClass}>شركة الشحن سلمت الطلب؟</span>
+                        <select value={order.shipping_company_status ?? "لم يتم التسليم"} onChange={(event) => updateOrderField(order.id, "shipping_company_status", event.target.value as Order["shipping_company_status"], "تعذر حفظ حالة تسليم شركة الشحن")} className={`${selectBase} ${(order.shipping_company_status ?? "لم يتم التسليم") === "تم التسليم" ? "border-green-200 bg-green-50 text-green-700" : "border-amber-200 bg-amber-50 text-amber-700"}`}>
+                          <option value="لم يتم التسليم">لم يتم التسليم</option>
+                          <option value="تم التسليم">تم التسليم</option>
+                        </select>
+                      </label>
+
+                      <label dir="rtl" className="flex min-w-0 flex-col gap-1">
+                        <span className={labelClass}>حالة التحصيل</span>
+                        <select value={order.collection_status ?? "لم يتم التحصيل"} onChange={(event) => updateOrderField(order.id, "collection_status", event.target.value as Order["collection_status"], "تعذر حفظ حالة التحصيل")} className={`${selectBase} ${(order.collection_status ?? "لم يتم التحصيل") === "تم التحصيل" ? "border-green-200 bg-green-50 text-green-700" : "border-amber-200 bg-amber-50 text-amber-700"}`}>
+                          <option value="لم يتم التحصيل">لم يتم التحصيل</option>
+                          <option value="تم التحصيل">تم التحصيل</option>
+                        </select>
+                      </label>
+
+                      <div dir="rtl" className="flex min-w-0 flex-col gap-1">
+                        <span className={labelClass}>مصدر العميل</span>
+                        <span className="flex min-h-[42px] items-center justify-center gap-1.5 rounded-xl bg-blue-50 px-3 py-2.5 text-xs font-bold text-blue-700 ring-1 ring-blue-200">
+                          {order.source === "website" || order.source === "الموقع" ? <Globe size={14} /> : <MessageCircle size={14} />}
+                          {order.source === "website" || order.source === "الموقع" ? "موقع" : order.source || "غير محدد"}
+                        </span>
                       </div>
                     </div>
                   </div>
