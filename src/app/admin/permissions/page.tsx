@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useCallback, useEffect, useState } from "react";
-import { LockKeyhole, Plus, RefreshCw, ShieldCheck, Users } from "lucide-react";
+import { Eye, EyeOff, LockKeyhole, Plus, RefreshCw, ShieldCheck, Users } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
 type AdminRole = "full_access" | "orders_only";
@@ -16,6 +16,11 @@ interface PermissionUser {
 
 const PERMISSIONS_PASSWORD = "43211";
 
+function normalizeUsernameInput(value: string) {
+  const normalized = value.trim().toLowerCase().replace(/\s+/g, "");
+  return normalized.includes("@") ? normalized.split("@")[0] : normalized;
+}
+
 export default function PermissionsPage() {
   const [unlocked, setUnlocked] = useState(false);
   const [password, setPassword] = useState("");
@@ -27,7 +32,11 @@ export default function PermissionsPage() {
   const [adding, setAdding] = useState(false);
   const [newUsername, setNewUsername] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [showNewPassword, setShowNewPassword] = useState(false);
   const [newRole, setNewRole] = useState<AdminRole>("orders_only");
+  const [resettingUserId, setResettingUserId] = useState<string | null>(null);
+  const [resetPassword, setResetPassword] = useState("");
+  const [showResetPassword, setShowResetPassword] = useState(false);
 
   const loadUsers = useCallback(async () => {
     setError("");
@@ -68,9 +77,9 @@ export default function PermissionsPage() {
     setError("");
     setSuccess("");
 
-    const username = newUsername.trim().toLowerCase();
+    const username = normalizeUsernameInput(newUsername);
     if (!/^[a-z0-9._-]{3,30}$/.test(username)) {
-      setError("اسم المستخدم لازم يكون 3 أحرف على الأقل، وبالإنجليزي بدون مسافات.");
+      setError("اكتب اسم مستخدم إنجليزي من 3 إلى 30 حرفًا. لو كتبت إيميل هنستخدم الجزء اللي قبل @ تلقائيًا.");
       return;
     }
     if (newPassword.length < 6) {
@@ -106,7 +115,7 @@ export default function PermissionsPage() {
     setNewUsername("");
     setNewPassword("");
     setNewRole("orders_only");
-    setSuccess("تم إنشاء المستخدم وإضافة الصلاحية بنجاح.");
+    setSuccess(`تم إنشاء المستخدم ${username} وإضافة الصلاحية بنجاح.`);
     await loadUsers();
   }
 
@@ -119,6 +128,39 @@ export default function PermissionsPage() {
       await loadUsers();
     } else setError("");
     setSavingUserId(null);
+  }
+
+  async function updatePassword(user: PermissionUser) {
+    setError("");
+    setSuccess("");
+    if (resetPassword.length < 6) {
+      setError("كلمة المرور الجديدة لازم تكون 6 أحرف على الأقل.");
+      return;
+    }
+    setSavingUserId(user.user_id);
+    const { data: sessionData } = await supabase.auth.getSession();
+    const response = await fetch("/api/admin/users/password", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionData.session?.access_token || ""}`,
+      },
+      body: JSON.stringify({ user_id: user.user_id, password: resetPassword }),
+    });
+    const result = await response.json();
+    setSavingUserId(null);
+    if (!response.ok) {
+      const messages: Record<string, string> = {
+        WEAK_PASSWORD: "كلمة المرور الجديدة ضعيفة.",
+        FORBIDDEN: "ليس لديك صلاحية لتغيير كلمة المرور.",
+        SERVER_NOT_CONFIGURED: "مفتاح Supabase السري غير مضاف في Vercel.",
+      };
+      setError(messages[result.error] || "تعذر تغيير كلمة المرور.");
+      return;
+    }
+    setResettingUserId(null);
+    setResetPassword("");
+    setSuccess(`تم تغيير كلمة مرور ${user.username || user.email.split("@")[0]} بنجاح.`);
   }
 
   if (!unlocked) {
@@ -146,11 +188,12 @@ export default function PermissionsPage() {
         <form onSubmit={addUser} className="mt-6 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-liora-100">
           <h2 className="flex items-center gap-2 font-black text-liora-900"><Plus size={20} /> إضافة مستخدم</h2>
           <div className="mt-4 grid gap-3 md:grid-cols-[1fr_1fr_220px_auto] md:items-end">
-            <label className="flex flex-col gap-1"><span className="text-xs font-bold text-liora-600">اسم المستخدم</span><input value={newUsername} onChange={(e) => setNewUsername(e.target.value)} dir="ltr" placeholder="username" className="rounded-xl border border-liora-100 px-3 py-2.5 outline-none" /></label>
-            <label className="flex flex-col gap-1"><span className="text-xs font-bold text-liora-600">كلمة المرور</span><input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} dir="ltr" placeholder="6 أحرف على الأقل" className="rounded-xl border border-liora-100 px-3 py-2.5 outline-none" /></label>
+            <label className="flex flex-col gap-1"><span className="text-xs font-bold text-liora-600">اسم المستخدم</span><input value={newUsername} onChange={(e) => setNewUsername(e.target.value)} dir="ltr" placeholder="مثال: ahmed" className="rounded-xl border border-liora-100 px-3 py-2.5 outline-none" /></label>
+            <label className="flex flex-col gap-1"><span className="text-xs font-bold text-liora-600">كلمة المرور</span><div className="relative"><input type={showNewPassword ? "text" : "password"} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} dir="ltr" placeholder="6 أحرف على الأقل" className="w-full rounded-xl border border-liora-100 px-10 py-2.5 outline-none" /><button type="button" onClick={() => setShowNewPassword((value) => !value)} className="absolute inset-y-0 left-2 flex items-center text-liora-600" aria-label="إظهار أو إخفاء كلمة المرور">{showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button></div></label>
             <label className="flex flex-col gap-1"><span className="text-xs font-bold text-liora-600">نوع الصلاحية</span><select value={newRole} onChange={(e) => setNewRole(e.target.value as AdminRole)} className="rounded-xl border border-liora-100 bg-white px-3 py-2.5 font-bold"><option value="orders_only">الطلبات فقط</option><option value="full_access">صلاحية كاملة</option></select></label>
             <button type="submit" disabled={adding} className="rounded-xl bg-liora-800 px-5 py-2.5 font-bold text-white disabled:opacity-60">{adding ? "جارِ الإضافة..." : "إضافة"}</button>
           </div>
+          <p className="mt-2 text-xs text-liora-500">تقدر تكتب اسم مستخدم فقط، أو تكتب إيميل وسيتم استخدام الجزء الموجود قبل @ تلقائيًا.</p>
         </form>
 
         <div className="mt-5 grid gap-3 sm:grid-cols-2">
@@ -163,9 +206,11 @@ export default function PermissionsPage() {
 
         <div className="mt-6 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-liora-100">
           {users === null ? <p className="p-8 text-center text-liora-500">جارِ تحميل المستخدمين...</p> : users.length === 0 ? <p className="p-8 text-center text-liora-500">لا يوجد مستخدمون.</p> : users.map((user) => (
-            <div key={user.user_id} className="grid gap-3 border-b border-liora-50 px-5 py-4 last:border-0 sm:grid-cols-[1fr_220px] sm:items-center">
+            <div key={user.user_id} className="grid gap-3 border-b border-liora-50 px-5 py-4 last:border-0 sm:grid-cols-[1fr_220px_auto] sm:items-center">
               <div><p className="font-bold text-liora-900" dir="ltr">{user.username || user.email.split("@")[0]}</p><p className="mt-1 text-xs text-liora-400">تمت الإضافة: {new Date(user.created_at).toLocaleDateString("en-GB")}</p></div>
               <select value={user.role} disabled={savingUserId === user.user_id} onChange={(e) => changeRole(user, e.target.value as AdminRole)} className="rounded-xl border border-liora-100 bg-white px-3 py-2.5 text-sm font-bold text-liora-800 outline-none disabled:opacity-60"><option value="full_access">صلاحية كاملة</option><option value="orders_only">الطلبات فقط</option></select>
+              <button onClick={() => { setResettingUserId(user.user_id); setResetPassword(""); }} className="rounded-xl bg-liora-50 px-3 py-2.5 text-sm font-bold text-liora-800 ring-1 ring-liora-100">تغيير كلمة المرور</button>
+              {resettingUserId === user.user_id && <div className="sm:col-span-3 flex flex-col gap-2 rounded-xl bg-liora-50 p-3 sm:flex-row sm:items-center"><div className="relative flex-1"><input type={showResetPassword ? "text" : "password"} value={resetPassword} onChange={(e) => setResetPassword(e.target.value)} placeholder="اكتب كلمة المرور الجديدة" className="w-full rounded-xl border border-liora-100 bg-white px-10 py-2.5 outline-none" /><button type="button" onClick={() => setShowResetPassword((value) => !value)} className="absolute inset-y-0 left-2 flex items-center text-liora-600">{showResetPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button></div><button onClick={() => updatePassword(user)} disabled={savingUserId === user.user_id} className="rounded-xl bg-liora-800 px-4 py-2.5 font-bold text-white disabled:opacity-60">حفظ كلمة المرور الجديدة</button><button onClick={() => setResettingUserId(null)} className="rounded-xl bg-white px-4 py-2.5 font-bold text-liora-700 ring-1 ring-liora-100">إلغاء</button></div>}
             </div>
           ))}
         </div>
