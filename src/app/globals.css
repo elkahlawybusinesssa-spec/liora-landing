@@ -62,3 +62,25 @@ main[dir="rtl"] .grid.items-end {
 main[dir="rtl"] .grid.items-end > * {
   direction: rtl;
 }
+
+/* Admin orders: show edit and cancel as compact icon-only actions. */
+main[dir="rtl"] .grid.items-end > div:first-child button {
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  font-size: 0;
+  gap: 0;
+  align-self: flex-start;
+}
+
+main[dir="rtl"] .grid.items-end > div:first-child button svg {
+  width: 19px;
+  height: 19px;
+}
+
+/* Admin orders: keep the source text but remove its icon. */
+main[dir="rtl"] .grid.items-end > div:nth-child(8) > span:last-child svg {
+  display: none;
+}
