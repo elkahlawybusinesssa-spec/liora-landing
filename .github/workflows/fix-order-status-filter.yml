@@ -1,0 +1,61 @@
+name: Fix order status filtering
+
+on:
+  push:
+    paths:
+      - .github/workflows/fix-order-status-filter.yml
+
+permissions:
+  contents: write
+
+jobs:
+  fix-filter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update order and analytics filtering
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          orders_path = Path('src/app/admin/orders/page.tsx')
+          orders = orders_path.read_text()
+          old = 'if (statusFilter !== "all" && order.status !== statusFilter) return false;'
+          new = 'if (statusFilter !== "all" && workflowStatus(order) !== statusFilter) return false;'
+          if old not in orders:
+              raise SystemExit('Orders filter snippet not found')
+          orders_path.write_text(orders.replace(old, new, 1))
+
+          analytics_path = Path('src/components/AnalyticsSummary.tsx')
+          analytics = analytics_path.read_text()
+          analytics = analytics.replace(
+              'import { STATUS_OPTIONS, STATUS_COLOR_CLASSES } from "@/lib/orderStatus";',
+              'import { STATUS_OPTIONS, STATUS_COLOR_CLASSES, getWorkflowStatus } from "@/lib/orderStatus";'
+          )
+          analytics = analytics.replace(
+              'let ordersQuery = supabase.from("orders").select("price, created_at, status");',
+              'let ordersQuery = supabase.from("orders").select("price, created_at, status, waybill_status, shipping_company_status, collection_status");'
+          )
+          analytics = analytics.replace(
+              '''    if (status !== "all") {
+      ordersQuery = ordersQuery.eq("status", status);
+    }
+
+''',
+              ''
+          )
+          analytics = analytics.replace(
+              '    const orders = ordersData ?? [];',
+              '    const orders = (ordersData ?? []).filter((order) => status === "all" || getWorkflowStatus(order) === status);'
+          )
+          analytics_path.write_text(analytics)
+          PY
+
+      - name: Commit fix
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/app/admin/orders/page.tsx src/components/AnalyticsSummary.tsx
+          git commit -m "Fix exact workflow status filtering"
+          git push
