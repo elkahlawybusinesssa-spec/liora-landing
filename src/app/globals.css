@@ -54,123 +54,124 @@ body {
   pointer-events: auto;
 }
 
-/* Admin orders: keep the operational workflow in the exact visual order requested. */
+/* Admin orders: keep the operational workflow in the requested visual order. */
 main[dir="rtl"] .grid.items-end {
   direction: ltr;
 }
 
 main[dir="rtl"] .grid.items-end > * {
   direction: rtl;
+  min-width: 0;
 }
 
-/* Admin orders: show edit and cancel as compact icon-only actions. */
+/* Compact icon-only edit and cancel actions. */
 main[dir="rtl"] .grid.items-end > div:first-child button {
-  width: 44px;
-  min-width: 44px;
-  height: 44px;
-  min-height: 44px;
+  width: 40px;
+  min-width: 40px;
+  height: 40px;
+  min-height: 40px;
   padding: 0;
   font-size: 0;
   gap: 0;
-  align-self: flex-start;
 }
 
 main[dir="rtl"] .grid.items-end > div:first-child button svg {
-  width: 19px;
-  height: 19px;
+  width: 18px;
+  height: 18px;
 }
 
-/* Admin orders: keep the source text but remove its icon. */
-main[dir="rtl"] .grid.items-end > div:nth-child(8) > span:last-child svg {
-  display: none;
+/* Keep controls compact on laptop screens instead of stretching unnecessarily. */
+@media (min-width: 768px) {
+  main[dir="rtl"] .grid.items-end > div:nth-child(2) a,
+  main[dir="rtl"] .grid.items-end > div:nth-child(2) button {
+    min-height: 38px;
+    padding: 8px 12px;
+  }
+
+  main[dir="rtl"] .grid.items-end select {
+    min-height: 38px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
 }
 
-/* Admin orders: keep every operational control in one compact horizontal row. */
-main[dir="rtl"] .grid.items-end {
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: flex-end;
-  justify-content: flex-start;
-  gap: 8px;
-  width: 100%;
-  overflow-x: auto;
-  padding-bottom: 4px;
-  scrollbar-width: thin;
-}
-
-main[dir="rtl"] .grid.items-end > * {
-  flex: 0 0 auto;
-  width: auto;
-}
-
-main[dir="rtl"] .grid.items-end > div:first-child {
-  flex-direction: row;
-  align-items: flex-end;
-  gap: 6px;
-}
-
-main[dir="rtl"] .grid.items-end > div:nth-child(2) {
-  flex-direction: row;
-  align-items: flex-end;
-  gap: 8px;
-}
-
-main[dir="rtl"] .grid.items-end > div:nth-child(2) > div {
-  width: auto;
-  min-width: 118px;
-}
-
-main[dir="rtl"] .grid.items-end > div:nth-child(2) a,
-main[dir="rtl"] .grid.items-end > div:nth-child(2) button {
-  width: auto;
-  min-width: 118px;
-  min-height: 38px;
-  padding: 8px 12px;
-  white-space: nowrap;
-}
-
-main[dir="rtl"] .grid.items-end > div:nth-child(3) {
-  width: 210px;
-  min-width: 210px;
-}
-
-main[dir="rtl"] .grid.items-end > div:nth-child(4) {
-  width: 290px;
-  min-width: 290px;
-}
-
-main[dir="rtl"] .grid.items-end select {
-  min-height: 38px;
-  padding-top: 8px;
-  padding-bottom: 8px;
-}
-
+/* Mobile: two rows, no horizontal scrolling.
+   Row 1: action icons + both WhatsApp actions.
+   Row 2: national address + order/collection status. */
 @media (max-width: 767px) {
   main[dir="rtl"] .grid.items-end {
-    margin-top: 4px;
-    padding-bottom: 8px;
+    display: grid !important;
+    grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
+    align-items: start;
+    gap: 10px;
+    width: 100%;
+    overflow: visible !important;
+    padding: 0;
+  }
+
+  main[dir="rtl"] .grid.items-end > div:first-child {
+    grid-column: span 2;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: flex-start;
+    gap: 6px;
   }
 
   main[dir="rtl"] .grid.items-end > div:first-child button {
-    width: 38px;
-    min-width: 38px;
-    height: 38px;
-    min-height: 38px;
+    width: 36px;
+    min-width: 36px;
+    height: 36px;
+    min-height: 36px;
+  }
+
+  main[dir="rtl"] .grid.items-end > div:nth-child(2) {
+    grid-column: span 10;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
   }
 
   main[dir="rtl"] .grid.items-end > div:nth-child(2) > div,
   main[dir="rtl"] .grid.items-end > div:nth-child(2) a,
   main[dir="rtl"] .grid.items-end > div:nth-child(2) button {
-    min-width: 110px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  main[dir="rtl"] .grid.items-end > div:nth-child(2) a,
+  main[dir="rtl"] .grid.items-end > div:nth-child(2) button {
+    min-height: 38px;
+    padding: 8px 6px;
+    font-size: 12px;
+    white-space: nowrap;
   }
 
   main[dir="rtl"] .grid.items-end > div:nth-child(3) {
-    width: 190px;
-    min-width: 190px;
+    grid-column: span 6;
+    width: 100%;
+    min-width: 0;
   }
 
   main[dir="rtl"] .grid.items-end > div:nth-child(4) {
-    width: 250px;
-    min-width: 250px;
+    grid-column: span 6;
+    width: 100%;
+    min-width: 0;
+  }
+
+  main[dir="rtl"] .grid.items-end input,
+  main[dir="rtl"] .grid.items-end select {
+    width: 100%;
+    min-width: 0;
+    font-size: 12px;
+  }
+
+  main[dir="rtl"] .grid.items-end select {
+    min-height: 40px;
+    padding: 8px;
+  }
+
+  main[dir="rtl"] .grid.items-end > div:nth-child(4) > div.mt-1 {
+    width: 100%;
   }
 }
