@@ -46,7 +46,7 @@ interface Lead {
 }
 
 const ORDER_AND_COLLECTION_OPTIONS = [
-  ...STATUS_OPTIONS.filter((item) => item.label !== "عميل مهتم واتساب" && item.value !== "عميل مهتم واتساب"),
+  ...STATUS_OPTIONS.filter((item) => item.value !== "interested_whatsapp"),
   { value: "لم يتم التحصيل", label: "لم يتم التحصيل" },
   { value: "تم التحصيل", label: "تم التحصيل" },
 ];
@@ -70,6 +70,10 @@ function shippingStage(order: Order) {
   if (order.waybill_status === "تم الاصدار" && order.shipping_company_status === "لم يتم التسليم") return "لم يتم تسليم الطلب";
   if (order.waybill_status === "تم الاصدار") return "تم إصدار بوليصة";
   return "لم يتم إصدار بوليصة";
+}
+
+function customerSource(order: Order) {
+  return order.source === "website" || order.source === "الموقع" ? "موقع" : order.source || "غير محدد";
 }
 
 export default function AdminOrdersPage() {
@@ -252,10 +256,11 @@ export default function AdminOrdersPage() {
                       <p className="text-sm text-liora-600">{order.city} — {order.address}</p>
                       {order.product && <p className="mt-1 text-xs text-liora-500">المنتج: {order.product}{order.quantity != null ? ` (${order.quantity} مجموعة)` : ""}{order.price != null ? ` — ${order.price} ريال` : ""}</p>}
                       {order.notes && <p className="mt-1 text-xs text-liora-500">ملاحظات: {order.notes}</p>}
+                      <p className="mt-1 text-xs font-bold text-liora-600">مصدر العميل: {customerSource(order)}</p>
                       <p className="mt-1 text-xs text-liora-400" dir="ltr">{formatDate(order.created_at)}<span dir="rtl"> — المصدر: {labelForPlatform(order.platform)}</span></p>
                     </div>
 
-                    <div dir="ltr" className="grid items-end gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-[70px_minmax(160px,1fr)_minmax(180px,1.2fr)_repeat(3,minmax(155px,1fr))]">
+                    <div dir="ltr" className="grid items-end gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-[70px_minmax(160px,1fr)_minmax(180px,1.2fr)_repeat(2,minmax(155px,1fr))]">
                       <div dir="rtl" className="flex flex-col gap-2">
                         <button title="تعديل الطلب" aria-label="تعديل الطلب" onClick={() => setEditingOrder(order)} className="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-liora-800 shadow ring-1 ring-liora-100"><Pencil size={18} /></button>
                         <button title="إلغاء الطلب" aria-label="إلغاء الطلب" onClick={() => handleDelete(order)} className="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-red-600 shadow ring-1 ring-red-200"><Trash2 size={18} /></button>
@@ -281,8 +286,6 @@ export default function AdminOrdersPage() {
                         <select value={currentShippingStage} onChange={(event) => changeShippingStage(order, event.target.value)} className={`${selectBase} ${currentShippingStage === "تم تسليم الطلب" ? "border-green-200 bg-green-50 text-green-700" : "border-amber-200 bg-amber-50 text-amber-700"}`}><option value="لم يتم إصدار بوليصة">لم يتم إصدار بوليصة</option><option value="تم إصدار بوليصة">تم إصدار بوليصة</option><option value="لم يتم تسليم الطلب">لم يتم تسليم الطلب</option><option value="تم تسليم الطلب">تم تسليم الطلب</option></select>
                         {currentShippingStage !== "لم يتم إصدار بوليصة" && (editingWaybill ? <div className="mt-1 flex gap-1"><input value={waybillDrafts[order.id] ?? order.waybill_number ?? ""} onChange={(event) => setWaybillDrafts((prev) => ({ ...prev, [order.id]: event.target.value }))} placeholder="رقم البوليصة" className="min-w-0 flex-1 rounded-lg border border-liora-100 px-2 py-2 text-xs outline-none" /><button onClick={() => saveWaybillNumber(order)} className="rounded-lg bg-liora-800 px-2 text-xs font-bold text-white">حفظ</button></div> : <div className="mt-1 flex items-center justify-between gap-1 rounded-lg bg-liora-50 px-2 py-1.5 text-xs"><span className="truncate">{order.waybill_number}</span><button onClick={() => { setWaybillDrafts((prev) => ({ ...prev, [order.id]: order.waybill_number ?? "" })); setEditingWaybillId(order.id); }} className="font-bold text-liora-800">تعديل</button></div>)}
                       </div>
-
-                      <div dir="rtl" className="flex min-w-0 flex-col gap-1"><span className={labelClass}>مصدر العميل</span><span className="flex min-h-[42px] items-center justify-center rounded-xl bg-blue-50 px-3 py-2.5 text-xs font-bold text-blue-700 ring-1 ring-blue-200">{order.source === "website" || order.source === "الموقع" ? "موقع" : order.source || "غير محدد"}</span></div>
                     </div>
                   </div>
                 </div>
