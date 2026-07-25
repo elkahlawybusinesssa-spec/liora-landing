@@ -4,8 +4,7 @@ export type WorkflowStatus =
   | "confirmed_no_waybill"
   | "confirmed_waybill"
   | "shipment_not_delivered"
-  | "shipment_delivered"
-  | "not_collected"
+  | "delivered_not_collected"
   | "collected";
 
 export interface WorkflowOrderFields {
@@ -21,15 +20,17 @@ export const STATUS_OPTIONS: Array<{ value: WorkflowStatus; label: string; color
   { value: "confirmed_no_waybill", label: "تم التاكيد - لم يتم اصدار بوليصة", color: "amber" },
   { value: "confirmed_waybill", label: "تم التاكيد - تم اصدار بوليصة", color: "purple" },
   { value: "shipment_not_delivered", label: "لم يتم تسليم الشحنة", color: "orange" },
-  { value: "shipment_delivered", label: "تم تسليم الشحنة", color: "green" },
-  { value: "not_collected", label: "لم يتم التحصيل", color: "red" },
+  { value: "delivered_not_collected", label: "تم تسليم الشحنة - لم يتم التحصيل", color: "red" },
   { value: "collected", label: "تم التحصيل", color: "emerald" },
 ];
 
 export function getWorkflowStatus(order: WorkflowOrderFields): WorkflowStatus {
   if (order.status === "تم التحصيل" || order.collection_status === "تم التحصيل") return "collected";
-  if (order.status === "لم يتم التحصيل") return "not_collected";
-  if (order.status === "delivered" || order.shipping_company_status === "تم التسليم") return "shipment_delivered";
+  if (
+    order.status === "لم يتم التحصيل" ||
+    order.status === "delivered" ||
+    order.shipping_company_status === "تم التسليم"
+  ) return "delivered_not_collected";
   if (order.status === "shipment_not_delivered") return "shipment_not_delivered";
   if (order.status === "confirmed" && order.waybill_status === "تم الاصدار") return "confirmed_waybill";
   if (order.status === "confirmed") return "confirmed_no_waybill";
@@ -63,12 +64,7 @@ export const STATUS_COLOR_CLASSES: Record<string, { active: string; inactive: st
     inactive: "bg-orange-50 text-orange-700 hover:bg-orange-100",
     select: "border-orange-300 bg-orange-500 text-white focus:border-orange-500",
   },
-  shipment_delivered: {
-    active: "bg-green-600 text-white",
-    inactive: "bg-green-50 text-green-700 hover:bg-green-100",
-    select: "border-green-300 bg-green-500 text-white focus:border-green-500",
-  },
-  not_collected: {
+  delivered_not_collected: {
     active: "bg-red-600 text-white",
     inactive: "bg-red-50 text-red-700 hover:bg-red-100",
     select: "border-red-300 bg-red-500 text-white focus:border-red-500",
