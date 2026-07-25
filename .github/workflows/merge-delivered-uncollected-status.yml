@@ -1,0 +1,48 @@
+name: Merge delivered and uncollected status
+
+on:
+  push:
+    paths:
+      - .github/workflows/merge-delivered-uncollected-status.yml
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update order workflow states
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('src/app/admin/orders/page.tsx')
+          text = path.read_text()
+
+          replacements = [
+              ('  | "shipment_delivered"\n  | "not_collected"\n  | "collected";', '  | "delivered_not_collected"\n  | "collected";'),
+              ('  { value: "shipment_delivered", label: "تم تسليم الشحنة" },\n  { value: "not_collected", label: "لم يتم التحصيل" },', '  { value: "delivered_not_collected", label: "تم تسليم الشحنة - لم يتم التحصيل" },'),
+              ('  if (order.status === "لم يتم التحصيل") return "not_collected";\n  if (order.status === "delivered" || order.shipping_company_status === "تم التسليم") return "shipment_delivered";', '  if (order.status === "لم يتم التحصيل" || order.status === "delivered" || order.shipping_company_status === "تم التسليم") return "delivered_not_collected";'),
+              ('  if (value === "shipment_delivered" || value === "collected") return "border-green-300 bg-green-500 text-white";', '  if (value === "collected") return "border-green-300 bg-green-500 text-white";\n  if (value === "delivered_not_collected") return "border-red-300 bg-red-500 text-white";'),
+              ('    } else if (value === "shipment_delivered") {\n      Object.assign(updates, {\n        status: "delivered",\n        waybill_status: "تم الاصدار",\n        shipping_company_status: "تم التسليم",\n      });\n    } else if (value === "not_collected") {\n      Object.assign(updates, { status: "لم يتم التحصيل", collection_status: "لم يتم التحصيل" });', '    } else if (value === "delivered_not_collected") {\n      Object.assign(updates, {\n        status: "لم يتم التحصيل",\n        waybill_status: "تم الاصدار",\n        shipping_company_status: "تم التسليم",\n        collection_status: "لم يتم التحصيل",\n      });'),
+              ('currentWorkflow === "shipment_not_delivered" || currentWorkflow === "shipment_delivered"', 'currentWorkflow === "shipment_not_delivered" || currentWorkflow === "delivered_not_collected"'),
+          ]
+
+          for old, new in replacements:
+              if old not in text:
+                  raise SystemExit(f'Expected text not found:\n{old}')
+              text = text.replace(old, new, 1)
+
+          path.write_text(text)
+          PY
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/app/admin/orders/page.tsx
+          git commit -m "Merge delivered and uncollected workflow status"
+          git push
