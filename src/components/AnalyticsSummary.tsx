@@ -35,6 +35,11 @@ export default function AnalyticsSummary({
 }) {
   const [stats, setStats] = useState<Stats | null>(null);
   const [error, setError] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState(statusFilter);
+
+  useEffect(() => {
+    setSelectedStatus(statusFilter);
+  }, [statusFilter]);
 
   const loadStats = useCallback(async (range: DateRange, status: string) => {
     setError("");
@@ -81,8 +86,13 @@ export default function AnalyticsSummary({
   }, []);
 
   useEffect(() => {
-    loadStats(dateRange, statusFilter);
-  }, [dateRange, statusFilter, loadStats]);
+    loadStats(dateRange, selectedStatus);
+  }, [dateRange, selectedStatus, loadStats]);
+
+  const chooseStatus = (value: string) => {
+    setSelectedStatus(value);
+    onStatusFilterChange(value);
+  };
 
   const cards = stats
     ? [
@@ -94,9 +104,9 @@ export default function AnalyticsSummary({
       ]
     : [];
 
-  const selectedLabel = statusFilter === "all"
+  const selectedLabel = selectedStatus === "all"
     ? "كل الحالات"
-    : STATUS_OPTIONS.find((item) => item.value === statusFilter)?.label ?? "كل الحالات";
+    : STATUS_OPTIONS.find((item) => item.value === selectedStatus)?.label ?? "كل الحالات";
 
   const buttonStyle = (selected: boolean): React.CSSProperties => selected
     ? {
@@ -122,22 +132,22 @@ export default function AnalyticsSummary({
         <div className="relative z-20 flex flex-wrap gap-2 pointer-events-auto">
           <button
             type="button"
-            onClick={() => onStatusFilterChange("all")}
-            aria-pressed={statusFilter === "all"}
-            style={buttonStyle(statusFilter === "all")}
+            onClick={() => chooseStatus("all")}
+            aria-pressed={selectedStatus === "all"}
+            style={buttonStyle(selectedStatus === "all")}
             className="relative z-20 flex cursor-pointer items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-bold transition-all duration-150 active:scale-95 pointer-events-auto"
           >
-            {statusFilter === "all" && <Check size={13} strokeWidth={3} />}
+            {selectedStatus === "all" && <Check size={13} strokeWidth={3} />}
             كل الحالات
           </button>
 
           {STATUS_OPTIONS.map((item) => {
-            const selected = statusFilter === item.value;
+            const selected = selectedStatus === item.value;
             return (
               <button
                 type="button"
                 key={item.value}
-                onClick={() => onStatusFilterChange(item.value)}
+                onClick={() => chooseStatus(item.value)}
                 aria-pressed={selected}
                 style={buttonStyle(selected)}
                 className="relative z-20 flex cursor-pointer items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-bold transition-all duration-150 active:scale-95 pointer-events-auto"
