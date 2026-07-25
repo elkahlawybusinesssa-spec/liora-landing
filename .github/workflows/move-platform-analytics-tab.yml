@@ -47,3 +47,5 @@ jobs:
           git add src/app/admin/orders/page.tsx
           git commit -m "Move platform analytics into dedicated tab"
           git push
+
+# trigger
