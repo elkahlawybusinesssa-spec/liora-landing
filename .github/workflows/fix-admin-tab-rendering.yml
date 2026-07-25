@@ -1,0 +1,60 @@
+name: Fix admin tab rendering
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/fix-admin-tab-rendering.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Fix rendering
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('src/app/admin/orders/page.tsx')
+          s = p.read_text()
+
+          old = '''            {tab === "platforms" ? (\n          <div className="mt-6 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-liora-100"><PlatformBreakdown dateRange={dateRange} /></div>\n        ) : tab === "orders" ? (\n              <button onClick={() => setShowAddModal(true)} className="flex items-center gap-2 rounded-full bg-gold-500 px-4 py-2 text-sm font-bold text-liora-950 shadow"><Plus size={16} /> إضافة طلب</button>\n            ) : tab === "leads" ? (\n              <button onClick={() => setShowAddLeadModal(true)} className="flex items-center gap-2 rounded-full bg-gold-500 px-4 py-2 text-sm font-bold text-liora-950 shadow"><UserPlus size={16} /> إضافة ليد</button>\n            ) : null}'''
+          new = '''            {tab === "orders" ? (\n              <button onClick={() => setShowAddModal(true)} className="flex items-center gap-2 rounded-full bg-gold-500 px-4 py-2 text-sm font-bold text-liora-950 shadow"><Plus size={16} /> إضافة طلب</button>\n            ) : tab === "leads" ? (\n              <button onClick={() => setShowAddLeadModal(true)} className="flex items-center gap-2 rounded-full bg-gold-500 px-4 py-2 text-sm font-bold text-liora-950 shadow"><UserPlus size={16} /> إضافة ليد</button>\n            ) : null}'''
+          if old not in s:
+              raise SystemExit('header block not found')
+          s = s.replace(old, new)
+
+          old = '''        <div className="mt-4"><DateRangeFilter value={dateRange} onChange={setDateRange} /></div>\n        <div className="mt-6 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-liora-100"><AnalyticsSummary dateRange={dateRange} statusFilter={statusFilter} onStatusFilterChange={setStatusFilter} /></div>'''
+          new = '''        <div className="mt-4"><DateRangeFilter value={dateRange} onChange={setDateRange} /></div>\n        {tab === "orders" && (\n          <div className="mt-6 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-liora-100">\n            <AnalyticsSummary dateRange={dateRange} statusFilter={statusFilter} onStatusFilterChange={setStatusFilter} />\n          </div>\n        )}'''
+          if old not in s:
+              raise SystemExit('analytics block not found')
+          s = s.replace(old, new)
+
+          old = ''') : !filteredLeads ? <p className="mt-8 text-center text-liora-700">جارِ التحميل...</p> : filteredLeads.length === 0 ? <p className="mt-8 text-center text-liora-700">لا يوجد ليدز في الفترة دي</p> : ('''
+          new = ''') : tab === "leads" ? (\n          !filteredLeads ? <p className="mt-8 text-center text-liora-700">جارِ التحميل...</p> : filteredLeads.length === 0 ? <p className="mt-8 text-center text-liora-700">لا يوجد ليدز في الفترة دي</p> : ('''
+          if old not in s:
+              raise SystemExit('leads branch start not found')
+          s = s.replace(old, new)
+
+          old = '''          </div>\n        )}\n      </div>'''
+          new = '''          </div>\n        )\n        ) : (\n          <div className="mt-6 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-liora-100">\n            <PlatformBreakdown dateRange={dateRange} />\n          </div>\n        )}\n      </div>'''
+          idx = s.rfind(old)
+          if idx == -1:
+              raise SystemExit('content branch end not found')
+          s = s[:idx] + s[idx:].replace(old, new, 1)
+
+          p.write_text(s)
+          PY
+      - name: Commit fix
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/app/admin/orders/page.tsx
+          git commit -m "Fix admin tab lag and missing order list" || exit 0
+          git push
