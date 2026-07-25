@@ -1,0 +1,100 @@
+name: Rebuild order status filter wiring
+
+on:
+  push:
+    paths:
+      - .github/workflows/rebuild-status-filter.yml
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Rebuild status filter as parent-controlled UI
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          page = Path('src/app/admin/orders/page.tsx')
+          text = page.read_text()
+
+          text = text.replace(
+              'import { MessageCircle, RefreshCw, LogOut, Plus, Trash2, Pencil, Settings, UserPlus } from "lucide-react";',
+              'import { MessageCircle, RefreshCw, LogOut, Plus, Trash2, Pencil, Settings, UserPlus, Check } from "lucide-react";'
+          )
+          text = text.replace(
+              'import { STATUS_COLOR_CLASSES } from "@/lib/orderStatus";',
+              'import { STATUS_COLOR_CLASSES, STATUS_OPTIONS } from "@/lib/orderStatus";'
+          )
+
+          old = '        <div className="mt-6 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-liora-100"><AnalyticsSummary dateRange={dateRange} statusFilter={statusFilter} onStatusFilterChange={setStatusFilter} /></div>'
+          new = '''        <div className="relative z-50 mt-6 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-liora-100">
+          <div className="mb-5 flex flex-wrap gap-2" role="group" aria-label="فلترة الطلبات حسب الحالة">
+            <button
+              type="button"
+              onClick={() => setStatusFilter("all")}
+              aria-pressed={statusFilter === "all"}
+              className={`flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-bold transition-all ${statusFilter === "all" ? "border-liora-900 bg-liora-900 text-white shadow-lg ring-2 ring-liora-300 ring-offset-2" : "border-liora-100 bg-white text-liora-700 hover:bg-liora-50"}`}
+            >
+              {statusFilter === "all" && <Check size={13} strokeWidth={3} />}
+              كل الحالات
+            </button>
+            {STATUS_OPTIONS.map((item) => {
+              const selected = statusFilter === item.value;
+              return (
+                <button
+                  type="button"
+                  key={item.value}
+                  onClick={() => setStatusFilter(item.value)}
+                  aria-pressed={selected}
+                  className={`flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-bold transition-all ${selected ? "border-liora-900 bg-liora-900 text-white shadow-lg ring-2 ring-liora-300 ring-offset-2" : "border-liora-100 bg-white text-liora-700 hover:bg-liora-50"}`}
+                >
+                  {selected && <Check size={13} strokeWidth={3} />}
+                  {item.label}
+                </button>
+              );
+            })}
+          </div>
+          <AnalyticsSummary dateRange={dateRange} statusFilter={statusFilter} />
+        </div>'''
+          if old not in text:
+              raise SystemExit('AnalyticsSummary mount not found')
+          text = text.replace(old, new, 1)
+          page.write_text(text)
+
+          analytics = Path('src/components/AnalyticsSummary.tsx')
+          a = analytics.read_text()
+          a = a.replace(', Check', '')
+          a = a.replace('import { STATUS_OPTIONS, getWorkflowStatus } from "@/lib/orderStatus";', 'import { STATUS_OPTIONS, getWorkflowStatus } from "@/lib/orderStatus";')
+          a = a.replace(',\n  onStatusFilterChange,', ',')
+          a = a.replace('  onStatusFilterChange: (status: string) => void;\n', '')
+
+          start = a.find('  const buttonStyle =')
+          end = a.find('\n\n  return (', start)
+          if start != -1 and end != -1:
+              a = a[:start] + a[end:]
+
+          controls_start = a.find('      <div className="flex flex-wrap items-center justify-between gap-3">')
+          controls_end = a.find('\n\n      <p className="mt-3 text-xs font-bold text-liora-700">', controls_start)
+          if controls_start == -1 or controls_end == -1:
+              raise SystemExit('Analytics filter controls block not found')
+          replacement = '''      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="text-lg font-black text-liora-900">لوحة التحليلات</h2>
+        <p className="rounded-full bg-liora-50 px-3 py-1.5 text-xs font-bold text-liora-700">الفلتر الحالي: {selectedLabel}</p>
+      </div>'''
+          a = a[:controls_start] + replacement + a[controls_end:]
+          a = a.replace('\n\n      <p className="mt-3 text-xs font-bold text-liora-700">الفلتر الحالي: {selectedLabel}</p>', '')
+          analytics.write_text(a)
+          PY
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/app/admin/orders/page.tsx src/components/AnalyticsSummary.tsx
+          git commit -m "Rebuild status filter and analytics wiring"
+          git push
