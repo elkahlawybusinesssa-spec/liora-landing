@@ -56,7 +56,7 @@ type WorkflowStatus =
 
 const WORKFLOW_OPTIONS: Array<{ value: WorkflowStatus; label: string }> = [
   { value: "new", label: "طلب جديد" },
-  { value: "contacted", label: "تم التواصل" },
+  { value: "contacted", label: "تم التواصل لتأكيد الطلب" },
   { value: "confirmed_no_waybill", label: "تم التاكيد - لم يتم اصدار بوليصة" },
   { value: "confirmed_waybill", label: "تم التاكيد - تم اصدار بوليصة" },
   { value: "shipment_not_delivered", label: "لم يتم تسليم الشحنة" },
