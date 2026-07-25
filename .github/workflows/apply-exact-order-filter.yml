@@ -38,3 +38,5 @@ jobs:
           git add src/app/admin/orders/page.tsx
           git commit -m "Fix exact order workflow filtering"
           git push
+
+# trigger: 2
