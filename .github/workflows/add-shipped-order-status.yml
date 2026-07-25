@@ -1,0 +1,66 @@
+name: Add shipped order status
+
+on:
+  push:
+    paths:
+      - .github/workflows/add-shipped-order-status.yml
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update order workflow
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('src/app/admin/orders/page.tsx')
+          text = path.read_text()
+
+          replacements = [
+              (
+                  '  | "confirmed_waybill"\n  | "shipment_not_delivered"',
+                  '  | "confirmed_waybill"\n  | "shipped"\n  | "shipment_not_delivered"'
+              ),
+              (
+                  '  { value: "confirmed_waybill", label: "تم التاكيد - تم اصدار بوليصة" },\n  { value: "shipment_not_delivered", label: "لم يتم تسليم الشحنة" },',
+                  '  { value: "confirmed_waybill", label: "تم اصدار بوليصة" },\n  { value: "shipped", label: "تم الشحن" },\n  { value: "shipment_not_delivered", label: "لم يتم تسليم الشحنة" },'
+              ),
+              (
+                  '  if (order.status === "لم يتم التحصيل" || order.status === "delivered" || order.shipping_company_status === "تم التسليم") return "delivered_not_collected";\n  if (order.waybill_status === "تم الاصدار" && order.shipping_company_status === "لم يتم التسليم") {',
+                  '  if (order.status === "لم يتم التحصيل" || order.status === "delivered" || order.shipping_company_status === "تم التسليم") return "delivered_not_collected";\n  if (order.status === "shipment_not_delivered") return "shipment_not_delivered";\n  if (order.status === "shipped") return "shipped";\n  if (order.waybill_status === "تم الاصدار" && order.shipping_company_status === "لم يتم التسليم") {'
+              ),
+              (
+                  '  if (value === "delivered_not_collected") return "border-red-300 bg-red-500 text-white";\n  if (value === "confirmed_waybill") return "border-purple-300 bg-purple-500 text-white";',
+                  '  if (value === "delivered_not_collected") return "border-red-300 bg-red-500 text-white";\n  if (value === "shipped") return "border-cyan-300 bg-cyan-500 text-white";\n  if (value === "confirmed_waybill") return "border-purple-300 bg-purple-500 text-white";'
+              ),
+              (
+                  '      setWaybillDrafts((prev) => ({ ...prev, [order.id]: order.waybill_number ?? "" }));\n      setEditingWaybillId(order.id);\n    } else if (value === "shipment_not_delivered") {\n      Object.assign(updates, {\n        status: "confirmed",',
+                  '      setWaybillDrafts((prev) => ({ ...prev, [order.id]: order.waybill_number ?? "" }));\n      setEditingWaybillId(order.id);\n    } else if (value === "shipped") {\n      Object.assign(updates, {\n        status: "shipped",\n        waybill_status: "تم الاصدار",\n        shipping_company_status: "لم يتم التسليم",\n      });\n    } else if (value === "shipment_not_delivered") {\n      Object.assign(updates, {\n        status: "shipment_not_delivered",'
+              ),
+              (
+                  'const showWaybill = currentWorkflow === "confirmed_waybill" || currentWorkflow === "shipment_not_delivered" || currentWorkflow === "delivered_not_collected";',
+                  'const showWaybill = currentWorkflow === "confirmed_waybill" || currentWorkflow === "shipped" || currentWorkflow === "shipment_not_delivered" || currentWorkflow === "delivered_not_collected";'
+              ),
+          ]
+
+          for old, new in replacements:
+              if old not in text:
+                  raise SystemExit(f'Expected text not found:\n{old}')
+              text = text.replace(old, new, 1)
+
+          path.write_text(text)
+          PY
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/app/admin/orders/page.tsx
+          git commit -m "Add shipped order workflow status"
+          git push
