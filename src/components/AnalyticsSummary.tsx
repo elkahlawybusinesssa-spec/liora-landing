@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Eye, ShoppingBag, TrendingUp, Wallet, BadgeDollarSign } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { DateRange } from "@/components/DateRangeFilter";
-import { STATUS_OPTIONS, STATUS_COLOR_CLASSES } from "@/lib/orderStatus";
+import { STATUS_OPTIONS, STATUS_COLOR_CLASSES, getWorkflowStatus } from "@/lib/orderStatus";
 import { riyadhRangeBounds } from "@/lib/riyadhDate";
 
 interface Stats {
@@ -13,6 +13,15 @@ interface Stats {
   avgOrderValue: number;
   conversionRate: number;
   totalSales: number;
+}
+
+interface AnalyticsOrder {
+  price: number | null;
+  created_at: string;
+  status: string;
+  shipping_company_status?: string | null;
+  collection_status?: string | null;
+  waybill_status?: string | null;
 }
 
 export default function AnalyticsSummary({
@@ -29,11 +38,12 @@ export default function AnalyticsSummary({
 
   const loadStats = useCallback(async (range: DateRange, status: string) => {
     setError("");
+    setStats(null);
 
-    let visitsQuery = supabase
-      .from("page_views")
-      .select("*", { count: "exact", head: true });
-    let ordersQuery = supabase.from("orders").select("price, created_at, status");
+    let visitsQuery = supabase.from("page_views").select("*", { count: "exact", head: true });
+    let ordersQuery = supabase
+      .from("orders")
+      .select("price,created_at,status,shipping_company_status,collection_status,waybill_status");
 
     const bounds = riyadhRangeBounds(range);
     if (bounds.gte) {
@@ -44,28 +54,28 @@ export default function AnalyticsSummary({
       visitsQuery = visitsQuery.lte("created_at", bounds.lte);
       ordersQuery = ordersQuery.lte("created_at", bounds.lte);
     }
-    if (status !== "all") {
-      ordersQuery = ordersQuery.eq("status", status);
-    }
 
-    const [{ count: visits, error: visitsError }, { data: ordersData, error: ordersError }] =
-      await Promise.all([visitsQuery, ordersQuery]);
+    const [visitsResult, ordersResult] = await Promise.all([visitsQuery, ordersQuery]);
 
-    if (visitsError || ordersError) {
+    if (visitsResult.error || ordersResult.error) {
       setError("تعذر تحميل الإحصائيات");
       return;
     }
 
-    const v = visits ?? 0;
-    const orders = ordersData ?? [];
-    const o = orders.length;
-    const totalSales = orders.reduce((sum, ord) => sum + Number(ord.price ?? 0), 0);
+    const allOrders = (ordersResult.data ?? []) as AnalyticsOrder[];
+    const orders = status === "all"
+      ? allOrders
+      : allOrders.filter((order) => getWorkflowStatus(order) === status);
+
+    const visits = visitsResult.count ?? 0;
+    const ordersCount = orders.length;
+    const totalSales = orders.reduce((sum, order) => sum + Number(order.price ?? 0), 0);
 
     setStats({
-      visits: v,
-      orders: o,
-      avgOrderValue: o > 0 ? Math.round(totalSales / o) : 0,
-      conversionRate: v > 0 ? (o / v) * 100 : 0,
+      visits,
+      orders: ordersCount,
+      avgOrderValue: ordersCount > 0 ? Math.round(totalSales / ordersCount) : 0,
+      conversionRate: visits > 0 ? (ordersCount / visits) * 100 : 0,
       totalSales,
     });
   }, []);
@@ -84,10 +94,9 @@ export default function AnalyticsSummary({
       ]
     : [];
 
-  const selectFilter = (value: string) => {
-    if (value === statusFilter) return;
-    onStatusFilterChange(value);
-  };
+  const selectedLabel = statusFilter === "all"
+    ? "كل الحالات"
+    : STATUS_OPTIONS.find((item) => item.value === statusFilter)?.label;
 
   return (
     <div className="relative z-10">
@@ -97,31 +106,40 @@ export default function AnalyticsSummary({
         <div className="relative z-20 flex flex-wrap gap-1.5 pointer-events-auto">
           <button
             type="button"
-            onClick={() => selectFilter("all")}
-            className={`relative z-20 cursor-pointer rounded-full px-3 py-1.5 text-xs font-bold transition pointer-events-auto ${
+            onClick={() => onStatusFilterChange("all")}
+            aria-pressed={statusFilter === "all"}
+            className={`relative z-20 cursor-pointer rounded-full border px-3 py-1.5 text-xs font-bold transition-all duration-150 active:scale-95 pointer-events-auto ${
               statusFilter === "all"
-                ? "bg-liora-800 text-white"
-                : "bg-liora-50 text-liora-700 hover:bg-liora-100"
+                ? "scale-[1.04] border-liora-900 bg-liora-900 text-white shadow-lg ring-2 ring-liora-300 ring-offset-2"
+                : "border-liora-100 bg-liora-50 text-liora-700 hover:bg-liora-100"
             }`}
           >
             كل الحالات
           </button>
-          {STATUS_OPTIONS.map((s) => (
-            <button
-              type="button"
-              key={`${s.value}-${s.label}`}
-              onClick={() => selectFilter(s.value)}
-              className={`relative z-20 cursor-pointer rounded-full px-3 py-1.5 text-xs font-bold transition pointer-events-auto ${
-                statusFilter === s.value
-                  ? STATUS_COLOR_CLASSES[s.value].active
-                  : STATUS_COLOR_CLASSES[s.value].inactive
-              }`}
-            >
-              {s.label}
-            </button>
-          ))}
+
+          {STATUS_OPTIONS.map((item) => {
+            const selected = statusFilter === item.value;
+            const colors = STATUS_COLOR_CLASSES[item.value];
+            return (
+              <button
+                type="button"
+                key={item.value}
+                onClick={() => onStatusFilterChange(item.value)}
+                aria-pressed={selected}
+                className={`relative z-20 cursor-pointer rounded-full border px-3 py-1.5 text-xs font-bold transition-all duration-150 active:scale-95 pointer-events-auto ${
+                  selected
+                    ? `${colors.active} scale-[1.04] shadow-lg ring-2 ring-current ring-offset-2`
+                    : colors.inactive
+                }`}
+              >
+                {item.label}
+              </button>
+            );
+          })}
         </div>
       </div>
+
+      <p className="mt-3 text-xs font-bold text-liora-700">الفلتر الحالي: {selectedLabel}</p>
 
       {error && (
         <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600">{error}</p>
@@ -131,14 +149,14 @@ export default function AnalyticsSummary({
         <p className="mt-4 text-center text-liora-700">جارِ التحميل...</p>
       ) : (
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {cards.map((c) => (
-            <div key={c.label} className="flex items-center gap-4 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-liora-100">
+          {cards.map((card) => (
+            <div key={card.label} className="flex items-center gap-4 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-liora-100">
               <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-liora-800 text-gold-400">
-                <c.icon size={22} />
+                <card.icon size={22} />
               </div>
               <div>
-                <p className="text-sm text-liora-600">{c.label}</p>
-                <p className="text-xl font-black text-liora-900">{c.value}</p>
+                <p className="text-sm text-liora-600">{card.label}</p>
+                <p className="text-xl font-black text-liora-900">{card.value}</p>
               </div>
             </div>
           ))}
