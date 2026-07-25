@@ -63,3 +63,5 @@ jobs:
           git add src/app/admin/orders/page.tsx
           git commit -m "Fix missing orders list after tab switches" || exit 0
           git push
+
+# trigger: 2
