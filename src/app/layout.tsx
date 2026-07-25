@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Tajawal } from "next/font/google";
 import Pixels from "@/components/Pixels";
+import OrderStatusFilterGuard from "@/components/OrderStatusFilterGuard";
 import "./globals.css";
 
 const tajawal = Tajawal({
@@ -25,6 +26,7 @@ export default function RootLayout({
     <html lang="ar" dir="rtl">
       <body className={`${tajawal.variable} font-tajawal antialiased`}>
         <Pixels />
+        <OrderStatusFilterGuard />
         {children}
       </body>
     </html>
