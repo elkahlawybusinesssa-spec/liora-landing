@@ -3,6 +3,7 @@ export type WorkflowStatus =
   | "contacted"
   | "confirmed_no_waybill"
   | "confirmed_waybill"
+  | "shipped"
   | "shipment_not_delivered"
   | "delivered_not_collected"
   | "collected";
@@ -18,7 +19,8 @@ export const STATUS_OPTIONS: Array<{ value: WorkflowStatus; label: string; color
   { value: "new", label: "طلب جديد", color: "blue" },
   { value: "contacted", label: "تم التواصل لتأكيد الطلب", color: "purple" },
   { value: "confirmed_no_waybill", label: "تم التاكيد - لم يتم اصدار بوليصة", color: "amber" },
-  { value: "confirmed_waybill", label: "تم التاكيد - تم اصدار بوليصة", color: "purple" },
+  { value: "confirmed_waybill", label: "تم اصدار بوليصة", color: "purple" },
+  { value: "shipped", label: "تم الشحن", color: "cyan" },
   { value: "shipment_not_delivered", label: "لم يتم تسليم الشحنة", color: "orange" },
   { value: "delivered_not_collected", label: "تم تسليم الشحنة - لم يتم التحصيل", color: "red" },
   { value: "collected", label: "تم التحصيل", color: "emerald" },
@@ -32,6 +34,7 @@ export function getWorkflowStatus(order: WorkflowOrderFields): WorkflowStatus {
     order.shipping_company_status === "تم التسليم"
   ) return "delivered_not_collected";
   if (order.status === "shipment_not_delivered") return "shipment_not_delivered";
+  if (order.status === "shipped") return "shipped";
   if (order.status === "confirmed" && order.waybill_status === "تم الاصدار") return "confirmed_waybill";
   if (order.status === "confirmed") return "confirmed_no_waybill";
   if (order.status === "contacted") return "contacted";
@@ -58,6 +61,11 @@ export const STATUS_COLOR_CLASSES: Record<string, { active: string; inactive: st
     active: "bg-purple-600 text-white",
     inactive: "bg-purple-50 text-purple-700 hover:bg-purple-100",
     select: "border-purple-300 bg-purple-500 text-white focus:border-purple-500",
+  },
+  shipped: {
+    active: "bg-cyan-600 text-white",
+    inactive: "bg-cyan-50 text-cyan-700 hover:bg-cyan-100",
+    select: "border-cyan-300 bg-cyan-500 text-white focus:border-cyan-500",
   },
   shipment_not_delivered: {
     active: "bg-orange-600 text-white",
