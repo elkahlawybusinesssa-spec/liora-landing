@@ -1,0 +1,49 @@
+name: Move platform analytics into tab
+
+on:
+  push:
+    paths:
+      - .github/workflows/move-platform-analytics-tab.yml
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Move platform breakdown into its own tab
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('src/app/admin/orders/page.tsx')
+          text = path.read_text()
+
+          replacements = [
+              ('const [tab, setTab] = useState<"orders" | "leads">("orders");', 'const [tab, setTab] = useState<"orders" | "leads" | "platforms">("orders");'),
+              ('{tab === "orders" ? `طلبات العملاء ${filteredOrders ? `(${filteredOrders.length})` : ""}` : `الليدز المهتمة ${filteredLeads ? `(${filteredLeads.length})` : ""}`}', '{tab === "orders" ? `طلبات العملاء ${filteredOrders ? `(${filteredOrders.length})` : ""}` : tab === "leads" ? `الليدز المهتمة ${filteredLeads ? `(${filteredLeads.length})` : ""}` : "تحاليل المنصات"}'),
+              ('{tab === "orders" ? (\n              <button onClick={() => setShowAddModal(true)} className="flex items-center gap-2 rounded-full bg-gold-500 px-4 py-2 text-sm font-bold text-liora-950 shadow"><Plus size={16} /> إضافة طلب</button>\n            ) : (\n              <button onClick={() => setShowAddLeadModal(true)} className="flex items-center gap-2 rounded-full bg-gold-500 px-4 py-2 text-sm font-bold text-liora-950 shadow"><UserPlus size={16} /> إضافة ليد</button>\n            )}', '{tab === "orders" ? (\n              <button onClick={() => setShowAddModal(true)} className="flex items-center gap-2 rounded-full bg-gold-500 px-4 py-2 text-sm font-bold text-liora-950 shadow"><Plus size={16} /> إضافة طلب</button>\n            ) : tab === "leads" ? (\n              <button onClick={() => setShowAddLeadModal(true)} className="flex items-center gap-2 rounded-full bg-gold-500 px-4 py-2 text-sm font-bold text-liora-950 shadow"><UserPlus size={16} /> إضافة ليد</button>\n            ) : null}'),
+              ('<button onClick={() => tab === "orders" ? loadOrders() : loadLeads()} className="flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-bold text-liora-800 shadow ring-1 ring-liora-100"><RefreshCw size={16} /> تحديث</button>', '<button onClick={() => tab === "orders" ? loadOrders() : tab === "leads" ? loadLeads() : undefined} className="flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-bold text-liora-800 shadow ring-1 ring-liora-100"><RefreshCw size={16} /> تحديث</button>'),
+              ('        <div className="mt-6 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-liora-100"><PlatformBreakdown dateRange={dateRange} /></div>\n', ''),
+              ('          <button onClick={() => setTab("leads")} className={`px-4 py-2 text-sm font-bold ${tab === "leads" ? "border-b-2 border-liora-800 text-liora-900" : "text-liora-500"}`}>الليدز المهتمة</button>\n', '          <button onClick={() => setTab("leads")} className={`px-4 py-2 text-sm font-bold ${tab === "leads" ? "border-b-2 border-liora-800 text-liora-900" : "text-liora-500"}`}>الليدز المهتمة</button>\n          <button onClick={() => setTab("platforms")} className={`px-4 py-2 text-sm font-bold ${tab === "platforms" ? "border-b-2 border-liora-800 text-liora-900" : "text-liora-500"}`}>تحاليل المنصات</button>\n'),
+              ('        {tab === "orders" ? (', '        {tab === "platforms" ? (\n          <div className="mt-6 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-liora-100"><PlatformBreakdown dateRange={dateRange} /></div>\n        ) : tab === "orders" ? ('),
+          ]
+
+          for old, new in replacements:
+              if old not in text:
+                  raise SystemExit(f'Expected text not found:\n{old}')
+              text = text.replace(old, new, 1)
+
+          path.write_text(text)
+          PY
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/app/admin/orders/page.tsx
+          git commit -m "Move platform analytics into dedicated tab"
+          git push
