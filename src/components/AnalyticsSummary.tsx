@@ -94,6 +94,12 @@ export default function AnalyticsSummary({
     onStatusFilterChange(value);
   };
 
+  const handlePointerDown = (event: React.PointerEvent<HTMLButtonElement>, value: string) => {
+    event.preventDefault();
+    event.stopPropagation();
+    chooseStatus(value);
+  };
+
   const cards = stats
     ? [
         { icon: Eye, label: "عدد الزيارات", value: stats.visits.toLocaleString("ar-SA") },
@@ -125,17 +131,21 @@ export default function AnalyticsSummary({
       };
 
   return (
-    <div className="relative z-10">
+    <div className="relative z-[100] isolate">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-lg font-black text-liora-900">لوحة التحليلات</h2>
 
-        <div className="relative z-20 flex flex-wrap gap-2 pointer-events-auto">
+        <div className="relative z-[110] flex flex-wrap gap-2 pointer-events-auto">
           <button
             type="button"
-            onClick={() => chooseStatus("all")}
+            onPointerDown={(event) => handlePointerDown(event, "all")}
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+            }}
             aria-pressed={selectedStatus === "all"}
             style={buttonStyle(selectedStatus === "all")}
-            className="relative z-20 flex cursor-pointer items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-bold transition-all duration-150 active:scale-95 pointer-events-auto"
+            className="relative z-[120] flex cursor-pointer select-none items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-bold transition-all duration-150 pointer-events-auto touch-manipulation"
           >
             {selectedStatus === "all" && <Check size={13} strokeWidth={3} />}
             كل الحالات
@@ -147,10 +157,14 @@ export default function AnalyticsSummary({
               <button
                 type="button"
                 key={item.value}
-                onClick={() => chooseStatus(item.value)}
+                onPointerDown={(event) => handlePointerDown(event, item.value)}
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                }}
                 aria-pressed={selected}
                 style={buttonStyle(selected)}
-                className="relative z-20 flex cursor-pointer items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-bold transition-all duration-150 active:scale-95 pointer-events-auto"
+                className="relative z-[120] flex cursor-pointer select-none items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-bold transition-all duration-150 pointer-events-auto touch-manipulation"
               >
                 {selected && <Check size={13} strokeWidth={3} />}
                 {item.label}
