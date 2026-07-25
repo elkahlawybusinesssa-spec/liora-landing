@@ -1,10 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Eye, ShoppingBag, TrendingUp, Wallet, BadgeDollarSign } from "lucide-react";
+import { Eye, ShoppingBag, TrendingUp, Wallet, BadgeDollarSign, Check } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { DateRange } from "@/components/DateRangeFilter";
-import { STATUS_OPTIONS, STATUS_COLOR_CLASSES, getWorkflowStatus } from "@/lib/orderStatus";
+import { STATUS_OPTIONS, getWorkflowStatus } from "@/lib/orderStatus";
 import { riyadhRangeBounds } from "@/lib/riyadhDate";
 
 interface Stats {
@@ -96,42 +96,53 @@ export default function AnalyticsSummary({
 
   const selectedLabel = statusFilter === "all"
     ? "كل الحالات"
-    : STATUS_OPTIONS.find((item) => item.value === statusFilter)?.label;
+    : STATUS_OPTIONS.find((item) => item.value === statusFilter)?.label ?? "كل الحالات";
+
+  const buttonStyle = (selected: boolean): React.CSSProperties => selected
+    ? {
+        backgroundColor: "#4c1d95",
+        color: "#ffffff",
+        borderColor: "#4c1d95",
+        boxShadow: "0 0 0 3px rgba(196, 181, 253, 0.8), 0 6px 16px rgba(76, 29, 149, 0.25)",
+        transform: "scale(1.04)",
+      }
+    : {
+        backgroundColor: "#ffffff",
+        color: "#5b4a78",
+        borderColor: "#e9e1f4",
+        boxShadow: "none",
+        transform: "scale(1)",
+      };
 
   return (
     <div className="relative z-10">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-lg font-black text-liora-900">لوحة التحليلات</h2>
 
-        <div className="relative z-20 flex flex-wrap gap-1.5 pointer-events-auto">
+        <div className="relative z-20 flex flex-wrap gap-2 pointer-events-auto">
           <button
             type="button"
             onClick={() => onStatusFilterChange("all")}
             aria-pressed={statusFilter === "all"}
-            className={`relative z-20 cursor-pointer rounded-full border px-3 py-1.5 text-xs font-bold transition-all duration-150 active:scale-95 pointer-events-auto ${
-              statusFilter === "all"
-                ? "scale-[1.04] border-liora-900 bg-liora-900 text-white shadow-lg ring-2 ring-liora-300 ring-offset-2"
-                : "border-liora-100 bg-liora-50 text-liora-700 hover:bg-liora-100"
-            }`}
+            style={buttonStyle(statusFilter === "all")}
+            className="relative z-20 flex cursor-pointer items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-bold transition-all duration-150 active:scale-95 pointer-events-auto"
           >
+            {statusFilter === "all" && <Check size={13} strokeWidth={3} />}
             كل الحالات
           </button>
 
           {STATUS_OPTIONS.map((item) => {
             const selected = statusFilter === item.value;
-            const colors = STATUS_COLOR_CLASSES[item.value];
             return (
               <button
                 type="button"
                 key={item.value}
                 onClick={() => onStatusFilterChange(item.value)}
                 aria-pressed={selected}
-                className={`relative z-20 cursor-pointer rounded-full border px-3 py-1.5 text-xs font-bold transition-all duration-150 active:scale-95 pointer-events-auto ${
-                  selected
-                    ? `${colors.active} scale-[1.04] shadow-lg ring-2 ring-current ring-offset-2`
-                    : colors.inactive
-                }`}
+                style={buttonStyle(selected)}
+                className="relative z-20 flex cursor-pointer items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-bold transition-all duration-150 active:scale-95 pointer-events-auto"
               >
+                {selected && <Check size={13} strokeWidth={3} />}
                 {item.label}
               </button>
             );
