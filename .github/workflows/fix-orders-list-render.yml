@@ -1,0 +1,65 @@
+name: Fix orders list render
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/fix-orders-list-render.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Rewrite tab content blocks
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          p = Path('src/app/admin/orders/page.tsx')
+          s = p.read_text()
+
+          start = s.index('        {tab === "orders" ? (')
+          leads = s.index('        ) : tab === "leads" ? (', start)
+          platform = s.index('        ) : (\n          <div className="mt-6 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-liora-100">\n            <PlatformBreakdown dateRange={dateRange} />', leads)
+          end = s.index('        )}\n      </div>', platform)
+
+          orders_body = s[start + len('        {tab === "orders" ? ('):leads]
+          leads_body = s[leads + len('        ) : tab === "leads" ? ('):platform]
+
+          replacement = f'''        {{tab === "orders" && (
+          <section key="orders-content">
+{orders_body}
+          </section>
+        )}}
+
+        {{tab === "leads" && (
+          <section key="leads-content">
+{leads_body}
+          </section>
+        )}}
+
+        {{tab === "platforms" && (
+          <section key="platforms-content" className="mt-6 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-liora-100">
+            <PlatformBreakdown dateRange={{dateRange}} />
+          </section>
+        )}}'''
+
+          s = s[:start] + replacement + s[end + len('        )}'):]
+          p.write_text(s)
+          PY
+      - name: Build check
+        run: npm ci && npm run build
+      - name: Commit fix
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/app/admin/orders/page.tsx
+          git commit -m "Fix missing orders list after tab switches" || exit 0
+          git push
