@@ -110,7 +110,7 @@ function workflowColor(value: WorkflowStatus) {
 
 export default function AdminOrdersPage() {
   const router = useRouter();
-  const [tab, setTab] = useState<"orders" | "leads">("orders");
+  const [tab, setTab] = useState<"orders" | "leads" | "platforms">("orders");
   const [orders, setOrders] = useState<Order[] | null>(null);
   const [leads, setLeads] = useState<Lead[] | null>(null);
   const [error, setError] = useState("");
@@ -289,27 +289,29 @@ export default function AdminOrdersPage() {
       <div className="mx-auto w-full max-w-[1900px]">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-2xl font-black text-liora-900">
-            {tab === "orders" ? `طلبات العملاء ${filteredOrders ? `(${filteredOrders.length})` : ""}` : `الليدز المهتمة ${filteredLeads ? `(${filteredLeads.length})` : ""}`}
+            {tab === "orders" ? `طلبات العملاء ${filteredOrders ? `(${filteredOrders.length})` : ""}` : tab === "leads" ? `الليدز المهتمة ${filteredLeads ? `(${filteredLeads.length})` : ""}` : "تحاليل المنصات"}
           </h1>
           <div className="flex flex-wrap gap-2">
-            {tab === "orders" ? (
+            {tab === "platforms" ? (
+          <div className="mt-6 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-liora-100"><PlatformBreakdown dateRange={dateRange} /></div>
+        ) : tab === "orders" ? (
               <button onClick={() => setShowAddModal(true)} className="flex items-center gap-2 rounded-full bg-gold-500 px-4 py-2 text-sm font-bold text-liora-950 shadow"><Plus size={16} /> إضافة طلب</button>
-            ) : (
+            ) : tab === "leads" ? (
               <button onClick={() => setShowAddLeadModal(true)} className="flex items-center gap-2 rounded-full bg-gold-500 px-4 py-2 text-sm font-bold text-liora-950 shadow"><UserPlus size={16} /> إضافة ليد</button>
-            )}
+            ) : null}
             <Link href="/admin/settings" className="flex items-center gap-2 rounded-full bg-liora-800 px-4 py-2 text-sm font-bold text-white shadow"><Settings size={16} /> الأسعار والشحن</Link>
-            <button onClick={() => tab === "orders" ? loadOrders() : loadLeads()} className="flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-bold text-liora-800 shadow ring-1 ring-liora-100"><RefreshCw size={16} /> تحديث</button>
+            <button onClick={() => tab === "orders" ? loadOrders() : tab === "leads" ? loadLeads() : undefined} className="flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-bold text-liora-800 shadow ring-1 ring-liora-100"><RefreshCw size={16} /> تحديث</button>
             <button onClick={handleLogout} className="flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-bold text-red-600 shadow ring-1 ring-liora-100"><LogOut size={16} /> خروج</button>
           </div>
         </div>
 
         <div className="mt-4"><DateRangeFilter value={dateRange} onChange={setDateRange} /></div>
         <div className="mt-6 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-liora-100"><AnalyticsSummary dateRange={dateRange} statusFilter={statusFilter} onStatusFilterChange={setStatusFilter} /></div>
-        <div className="mt-6 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-liora-100"><PlatformBreakdown dateRange={dateRange} /></div>
 
         <div className="mt-6 flex gap-2 border-b border-liora-100">
           <button onClick={() => setTab("orders")} className={`px-4 py-2 text-sm font-bold ${tab === "orders" ? "border-b-2 border-liora-800 text-liora-900" : "text-liora-500"}`}>الطلبات</button>
           <button onClick={() => setTab("leads")} className={`px-4 py-2 text-sm font-bold ${tab === "leads" ? "border-b-2 border-liora-800 text-liora-900" : "text-liora-500"}`}>الليدز المهتمة</button>
+          <button onClick={() => setTab("platforms")} className={`px-4 py-2 text-sm font-bold ${tab === "platforms" ? "border-b-2 border-liora-800 text-liora-900" : "text-liora-500"}`}>تحاليل المنصات</button>
         </div>
 
         {error && <p className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600">{error}</p>}
