@@ -1,0 +1,76 @@
+name: Rebuild admin tab content
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/rebuild-admin-tab-content.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Rebuild tab rendering without nested ternaries
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('src/app/admin/orders/page.tsx')
+          text = path.read_text()
+
+          start_marker = '        {tab === "orders" ? ('
+          middle_marker = '        ) : tab === "leads" ? ('
+          end_marker = '''        )
+        ) : (
+          <div className="mt-6 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-liora-100">
+            <PlatformBreakdown dateRange={dateRange} />
+          </div>
+        )}'''
+
+          start = text.find(start_marker)
+          middle = text.find(middle_marker, start + len(start_marker))
+          end = text.find(end_marker, middle + len(middle_marker))
+
+          if start == -1 or middle == -1 or end == -1:
+              raise SystemExit(f'Could not locate tab content markers: {start=}, {middle=}, {end=}')
+
+          orders_body = text[start + len(start_marker):middle]
+          leads_body = text[middle + len(middle_marker):end]
+
+          replacement = f'''        {{tab === "orders" && (
+          <div key="orders-tab">
+{orders_body}
+          </div>
+        )}}
+
+        {{tab === "leads" && (
+          <div key="leads-tab">
+{leads_body}
+          </div>
+        )}}
+
+        {{tab === "platforms" && (
+          <div key="platforms-tab" className="mt-6 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-liora-100">
+            <PlatformBreakdown dateRange={{dateRange}} />
+          </div>
+        )}}'''
+
+          text = text[:start] + replacement + text[end + len(end_marker):]
+          path.write_text(text)
+          PY
+      - name: Verify build
+        run: npm ci && npm run build
+      - name: Commit rebuilt tab content
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/app/admin/orders/page.tsx
+          git commit -m "Rebuild admin tab rendering without nested ternaries" || exit 0
+          git push
