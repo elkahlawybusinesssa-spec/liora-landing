@@ -268,7 +268,7 @@ export default function AdminOrdersPage() {
     const created = toRiyadhDateString(order.created_at);
     if (dateRange.from && created < dateRange.from) return false;
     if (dateRange.to && created > dateRange.to) return false;
-    if (statusFilter !== "all" && order.status !== statusFilter) return false;
+    if (statusFilter !== "all" && workflowStatus(order) !== statusFilter) return false;
     return true;
   }) ?? null;
 
