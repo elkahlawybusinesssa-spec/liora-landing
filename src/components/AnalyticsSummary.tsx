@@ -29,7 +29,6 @@ export default function AnalyticsSummary({
 
   const loadStats = useCallback(async (range: DateRange, status: string) => {
     setError("");
-    setStats(null);
 
     let visitsQuery = supabase
       .from("page_views")
@@ -73,8 +72,7 @@ export default function AnalyticsSummary({
 
   useEffect(() => {
     loadStats(dateRange, statusFilter);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dateRange, statusFilter]);
+  }, [dateRange, statusFilter, loadStats]);
 
   const cards = stats
     ? [
@@ -86,15 +84,21 @@ export default function AnalyticsSummary({
       ]
     : [];
 
+  const selectFilter = (value: string) => {
+    if (value === statusFilter) return;
+    onStatusFilterChange(value);
+  };
+
   return (
-    <div>
+    <div className="relative z-10">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-lg font-black text-liora-900">لوحة التحليلات</h2>
 
-        <div className="flex flex-wrap gap-1.5">
+        <div className="relative z-20 flex flex-wrap gap-1.5 pointer-events-auto">
           <button
-            onClick={() => onStatusFilterChange("all")}
-            className={`rounded-full px-3 py-1.5 text-xs font-bold transition ${
+            type="button"
+            onClick={() => selectFilter("all")}
+            className={`relative z-20 cursor-pointer rounded-full px-3 py-1.5 text-xs font-bold transition pointer-events-auto ${
               statusFilter === "all"
                 ? "bg-liora-800 text-white"
                 : "bg-liora-50 text-liora-700 hover:bg-liora-100"
@@ -104,9 +108,10 @@ export default function AnalyticsSummary({
           </button>
           {STATUS_OPTIONS.map((s) => (
             <button
+              type="button"
               key={`${s.value}-${s.label}`}
-              onClick={() => onStatusFilterChange(s.value)}
-              className={`rounded-full px-3 py-1.5 text-xs font-bold transition ${
+              onClick={() => selectFilter(s.value)}
+              className={`relative z-20 cursor-pointer rounded-full px-3 py-1.5 text-xs font-bold transition pointer-events-auto ${
                 statusFilter === s.value
                   ? STATUS_COLOR_CLASSES[s.value].active
                   : STATUS_COLOR_CLASSES[s.value].inactive
