@@ -300,9 +300,7 @@ export default function AdminOrdersPage() {
             {tab === "orders" ? `طلبات العملاء ${filteredOrders ? `(${filteredOrders.length})` : ""}` : tab === "leads" ? `الليدز المهتمة ${filteredLeads ? `(${filteredLeads.length})` : ""}` : "تحاليل المنصات"}
           </h1>
           <div className="flex flex-wrap gap-2">
-            {tab === "platforms" ? (
-          <div className="mt-6 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-liora-100"><PlatformBreakdown dateRange={dateRange} /></div>
-        ) : tab === "orders" ? (
+            {tab === "orders" ? (
               <button onClick={() => setShowAddModal(true)} className="flex items-center gap-2 rounded-full bg-gold-500 px-4 py-2 text-sm font-bold text-liora-950 shadow"><Plus size={16} /> إضافة طلب</button>
             ) : tab === "leads" ? (
               <button onClick={() => setShowAddLeadModal(true)} className="flex items-center gap-2 rounded-full bg-gold-500 px-4 py-2 text-sm font-bold text-liora-950 shadow"><UserPlus size={16} /> إضافة ليد</button>
@@ -314,7 +312,11 @@ export default function AdminOrdersPage() {
         </div>
 
         <div className="mt-4"><DateRangeFilter value={dateRange} onChange={setDateRange} /></div>
-        <div className="mt-6 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-liora-100"><AnalyticsSummary dateRange={dateRange} statusFilter={statusFilter} onStatusFilterChange={setStatusFilter} /></div>
+        {tab === "orders" && (
+          <div className="mt-6 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-liora-100">
+            <AnalyticsSummary dateRange={dateRange} statusFilter={statusFilter} onStatusFilterChange={setStatusFilter} />
+          </div>
+        )}
 
         <div className="mt-6 flex gap-2 border-b border-liora-100">
           <button onClick={() => setTab("orders")} className={`px-4 py-2 text-sm font-bold ${tab === "orders" ? "border-b-2 border-liora-800 text-liora-900" : "text-liora-500"}`}>الطلبات</button>
@@ -405,7 +407,8 @@ export default function AdminOrdersPage() {
               );
             })}
           </div>
-        ) : !filteredLeads ? <p className="mt-8 text-center text-liora-700">جارِ التحميل...</p> : filteredLeads.length === 0 ? <p className="mt-8 text-center text-liora-700">لا يوجد ليدز في الفترة دي</p> : (
+        ) : tab === "leads" ? (
+          !filteredLeads ? <p className="mt-8 text-center text-liora-700">جارِ التحميل...</p> : filteredLeads.length === 0 ? <p className="mt-8 text-center text-liora-700">لا يوجد ليدز في الفترة دي</p> : (
           <div className="mt-6 space-y-3">
             {filteredLeads.map((lead) => (
               <div key={lead.id} className="flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-liora-100 sm:flex-row sm:items-center sm:justify-between">
@@ -423,6 +426,11 @@ export default function AdminOrdersPage() {
                 </div>
               </div>
             ))}
+          </div>
+        )
+        ) : (
+          <div className="mt-6 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-liora-100">
+            <PlatformBreakdown dateRange={dateRange} />
           </div>
         )}
       </div>
