@@ -16,7 +16,7 @@ export interface WorkflowOrderFields {
 
 export const STATUS_OPTIONS: Array<{ value: WorkflowStatus; label: string; color: string }> = [
   { value: "new", label: "طلب جديد", color: "blue" },
-  { value: "contacted", label: "تم التواصل", color: "purple" },
+  { value: "contacted", label: "تم التواصل لتأكيد الطلب", color: "purple" },
   { value: "confirmed_no_waybill", label: "تم التاكيد - لم يتم اصدار بوليصة", color: "amber" },
   { value: "confirmed_waybill", label: "تم التاكيد - تم اصدار بوليصة", color: "purple" },
   { value: "shipment_not_delivered", label: "لم يتم تسليم الشحنة", color: "orange" },
