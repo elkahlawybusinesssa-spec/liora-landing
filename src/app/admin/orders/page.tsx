@@ -51,8 +51,7 @@ type WorkflowStatus =
   | "confirmed_no_waybill"
   | "confirmed_waybill"
   | "shipment_not_delivered"
-  | "shipment_delivered"
-  | "not_collected"
+  | "delivered_not_collected"
   | "collected";
 
 const WORKFLOW_OPTIONS: Array<{ value: WorkflowStatus; label: string }> = [
@@ -61,8 +60,7 @@ const WORKFLOW_OPTIONS: Array<{ value: WorkflowStatus; label: string }> = [
   { value: "confirmed_no_waybill", label: "تم التاكيد - لم يتم اصدار بوليصة" },
   { value: "confirmed_waybill", label: "تم التاكيد - تم اصدار بوليصة" },
   { value: "shipment_not_delivered", label: "لم يتم تسليم الشحنة" },
-  { value: "shipment_delivered", label: "تم تسليم الشحنة" },
-  { value: "not_collected", label: "لم يتم التحصيل" },
+  { value: "delivered_not_collected", label: "تم تسليم الشحنة - لم يتم التحصيل" },
   { value: "collected", label: "تم التحصيل" },
 ];
 
@@ -90,8 +88,7 @@ function customerSource(order: Order) {
 
 function workflowStatus(order: Order): WorkflowStatus {
   if (order.status === "تم التحصيل" || order.collection_status === "تم التحصيل") return "collected";
-  if (order.status === "لم يتم التحصيل") return "not_collected";
-  if (order.status === "delivered" || order.shipping_company_status === "تم التسليم") return "shipment_delivered";
+  if (order.status === "لم يتم التحصيل" || order.status === "delivered" || order.shipping_company_status === "تم التسليم") return "delivered_not_collected";
   if (order.waybill_status === "تم الاصدار" && order.shipping_company_status === "لم يتم التسليم") {
     return order.status === "confirmed" ? "confirmed_waybill" : "shipment_not_delivered";
   }
@@ -103,7 +100,8 @@ function workflowStatus(order: Order): WorkflowStatus {
 function workflowColor(value: WorkflowStatus) {
   if (value === "new") return STATUS_COLOR_CLASSES.new.select;
   if (value === "contacted") return STATUS_COLOR_CLASSES.contacted.select;
-  if (value === "shipment_delivered" || value === "collected") return "border-green-300 bg-green-500 text-white";
+  if (value === "collected") return "border-green-300 bg-green-500 text-white";
+  if (value === "delivered_not_collected") return "border-red-300 bg-red-500 text-white";
   if (value === "confirmed_waybill") return "border-purple-300 bg-purple-500 text-white";
   return "border-amber-200 bg-amber-50 text-amber-700";
 }
@@ -226,14 +224,13 @@ export default function AdminOrdersPage() {
         waybill_status: "تم الاصدار",
         shipping_company_status: "لم يتم التسليم",
       });
-    } else if (value === "shipment_delivered") {
+    } else if (value === "delivered_not_collected") {
       Object.assign(updates, {
-        status: "delivered",
+        status: "لم يتم التحصيل",
         waybill_status: "تم الاصدار",
         shipping_company_status: "تم التسليم",
+        collection_status: "لم يتم التحصيل",
       });
-    } else if (value === "not_collected") {
-      Object.assign(updates, { status: "لم يتم التحصيل", collection_status: "لم يتم التحصيل" });
     } else {
       Object.assign(updates, { status: "تم التحصيل", collection_status: "تم التحصيل" });
     }
@@ -324,7 +321,7 @@ export default function AdminOrdersPage() {
               const editingNational = editingNationalAddressId === order.id || !order.national_address;
               const editingWaybill = editingWaybillId === order.id || !order.waybill_number;
               const currentWorkflow = workflowStatus(order);
-              const showWaybill = currentWorkflow === "confirmed_waybill" || currentWorkflow === "shipment_not_delivered" || currentWorkflow === "shipment_delivered";
+              const showWaybill = currentWorkflow === "confirmed_waybill" || currentWorkflow === "shipment_not_delivered" || currentWorkflow === "delivered_not_collected";
 
               return (
                 <div key={order.id} className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-liora-100">
