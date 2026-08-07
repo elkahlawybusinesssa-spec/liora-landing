@@ -31,6 +31,9 @@ interface Order {
   national_address?: string | null;
   waybill_status?: "تم الاصدار" | "لم يتم الاصدار";
   waybill_number?: string | null;
+  status_updated_by?: string | null;
+  status_updated_at?: string | null;
+  status_updated_action?: string | null;
   source: string | null;
   platform: string | null;
   created_at: string;
@@ -98,6 +101,7 @@ export default function AdminOrdersPage() {
   const [nationalAddressDrafts, setNationalAddressDrafts] = useState<Record<string, string>>({});
   const [editingWaybillId, setEditingWaybillId] = useState<string | null>(null);
   const [waybillDrafts, setWaybillDrafts] = useState<Record<string, string>>({});
+  const [currentUsername, setCurrentUsername] = useState("");
 
   const loadOrders = useCallback(async () => {
     setError("");
@@ -129,6 +133,8 @@ export default function AdminOrdersPage() {
         router.replace("/admin");
         return;
       }
+      const user = data.session.user;
+      setCurrentUsername((user.user_metadata?.username as string) || user.email?.split("@")[0] || "");
       setCheckingAuth(false);
       void loadOrders();
       void loadLeads();
@@ -189,6 +195,11 @@ export default function AdminOrdersPage() {
     else if (value === "shipment_not_delivered") Object.assign(updates, { status: "shipment_not_delivered", waybill_status: "تم الاصدار", shipping_company_status: "لم يتم التسليم" });
     else if (value === "delivered_not_collected") Object.assign(updates, { status: "لم يتم التحصيل", waybill_status: "تم الاصدار", shipping_company_status: "تم التسليم", collection_status: "لم يتم التحصيل" });
     else Object.assign(updates, { status: "تم التحصيل", collection_status: "تم التحصيل" });
+    Object.assign(updates, {
+      status_updated_by: currentUsername || "غير معروف",
+      status_updated_at: new Date().toISOString(),
+      status_updated_action: STATUS_OPTIONS.find((item) => item.value === value)?.label ?? value,
+    });
     await updateOrderFields(order.id, updates, "تعذر حفظ حالة الطلب / التحصيل");
   }
 
@@ -305,6 +316,14 @@ export default function AdminOrdersPage() {
                             <select value={currentWorkflow} onChange={(event) => void changeWorkflowStatus(order, event.target.value as WorkflowStatus)} className={`${selectBase} ${workflowColor(currentWorkflow)}`}>
                               {STATUS_OPTIONS.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
                             </select>
+                            {order.status_updated_by && order.status_updated_at && (
+                              <p className="mt-1 rounded-lg bg-liora-50 px-2 py-1.5 text-[11px] leading-relaxed text-liora-600">
+                                آخر تعديل: <span className="font-bold text-liora-800">{order.status_updated_by}</span>
+                                {order.status_updated_action ? <> — {order.status_updated_action}</> : null}
+                                {" — "}
+                                <span dir="ltr">{formatDate(order.status_updated_at)}</span>
+                              </p>
+                            )}
                             {showWaybill && (editingWaybill ? <div className="mt-1 flex gap-1"><input value={waybillDrafts[order.id] ?? order.waybill_number ?? ""} onChange={(event) => setWaybillDrafts((prev) => ({ ...prev, [order.id]: event.target.value }))} placeholder="رقم البوليصة" className="min-w-0 flex-1 rounded-lg border border-liora-100 px-2 py-2 text-xs outline-none" /><button onClick={() => void saveWaybillNumber(order)} className="rounded-lg bg-liora-800 px-2 text-xs font-bold text-white">حفظ</button></div> : <div className="mt-1 flex items-center justify-between gap-1 rounded-lg bg-liora-50 px-2 py-1.5 text-xs"><span className="truncate">رقم البوليصة: {order.waybill_number}</span><button onClick={() => { setWaybillDrafts((prev) => ({ ...prev, [order.id]: order.waybill_number ?? "" })); setEditingWaybillId(order.id); }} className="font-bold text-liora-800">تعديل</button></div>)}
                           </div>
                         </div>
