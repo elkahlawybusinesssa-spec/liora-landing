@@ -79,6 +79,7 @@ function workflowColor(value: WorkflowStatus) {
   if (value === "delivered_not_collected") return "border-red-300 bg-red-500 text-white";
   if (value === "shipped") return "border-cyan-300 bg-cyan-500 text-white";
   if (value === "confirmed_waybill") return "border-purple-300 bg-purple-500 text-white";
+  if (value === "cancelled") return "border-gray-300 bg-gray-500 text-white";
   return "border-amber-200 bg-amber-50 text-amber-700";
 }
 
@@ -194,6 +195,7 @@ export default function AdminOrdersPage() {
     } else if (value === "shipped") Object.assign(updates, { status: "shipped", waybill_status: "تم الاصدار", shipping_company_status: "لم يتم التسليم" });
     else if (value === "shipment_not_delivered") Object.assign(updates, { status: "shipment_not_delivered", waybill_status: "تم الاصدار", shipping_company_status: "لم يتم التسليم" });
     else if (value === "delivered_not_collected") Object.assign(updates, { status: "لم يتم التحصيل", waybill_status: "تم الاصدار", shipping_company_status: "تم التسليم", collection_status: "لم يتم التحصيل" });
+    else if (value === "cancelled") Object.assign(updates, { status: "cancelled" });
     else Object.assign(updates, { status: "تم التحصيل", collection_status: "تم التحصيل" });
     Object.assign(updates, {
       status_updated_by: currentUsername || "غير معروف",

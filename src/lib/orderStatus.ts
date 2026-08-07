@@ -6,7 +6,8 @@ export type WorkflowStatus =
   | "shipped"
   | "shipment_not_delivered"
   | "delivered_not_collected"
-  | "collected";
+  | "collected"
+  | "cancelled";
 
 export interface WorkflowOrderFields {
   status: string;
@@ -24,9 +25,11 @@ export const STATUS_OPTIONS: Array<{ value: WorkflowStatus; label: string; color
   { value: "shipment_not_delivered", label: "لم يتم تسليم الشحنة", color: "orange" },
   { value: "delivered_not_collected", label: "تم تسليم الشحنة - لم يتم التحصيل", color: "red" },
   { value: "collected", label: "تم التحصيل", color: "emerald" },
+  { value: "cancelled", label: "ملغي", color: "gray" },
 ];
 
 export function getWorkflowStatus(order: WorkflowOrderFields): WorkflowStatus {
+  if (order.status === "cancelled") return "cancelled";
   if (order.status === "تم التحصيل" || order.collection_status === "تم التحصيل") return "collected";
   if (
     order.status === "لم يتم التحصيل" ||
@@ -81,5 +84,10 @@ export const STATUS_COLOR_CLASSES: Record<string, { active: string; inactive: st
     active: "bg-emerald-600 text-white",
     inactive: "bg-emerald-50 text-emerald-700 hover:bg-emerald-100",
     select: "border-emerald-300 bg-emerald-500 text-white focus:border-emerald-500",
+  },
+  cancelled: {
+    active: "bg-gray-600 text-white",
+    inactive: "bg-gray-100 text-gray-700 hover:bg-gray-200",
+    select: "border-gray-300 bg-gray-500 text-white focus:border-gray-500",
   },
 };
